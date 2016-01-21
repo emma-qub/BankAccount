@@ -12,9 +12,15 @@ TEMPLATE = app
 
 SOURCES += main.cxx\
         MainWindow.cxx \
-    CSVModel.cxx
+    CSVModel.cxx \
+    AccountWindow.cxx \
+    ChartWindow.cxx \
+    SettingsWindow.cxx
 
 HEADERS  += MainWindow.hxx \
-    CSVModel.hxx
+    CSVModel.hxx \
+    AccountWindow.hxx \
+    ChartWindow.hxx \
+    SettingsWindow.hxx
 
 CONFIG += C++11

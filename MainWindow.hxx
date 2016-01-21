@@ -3,8 +3,11 @@
 
 #include <QMainWindow>
 
-#include "CSVModel.hxx"
-#include <QTableView>
+class AccountWindow;
+class ChartWindow;
+class SettingsWindow;
+
+class QTabWidget;
 
 class MainWindow: public QMainWindow
 {
@@ -14,8 +17,11 @@ public:
   MainWindow(QWidget* parent = nullptr);
 
 private:
-  CSVModel* m_csvModel;
-  QTableView* m_tableView;
+  QTabWidget* m_tabWidget;
+
+  AccountWindow* m_accountWindow;
+  ChartWindow* m_chartWindow;
+  SettingsWindow* m_settingsWindow;
 
 };
 

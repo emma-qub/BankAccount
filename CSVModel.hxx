@@ -93,13 +93,23 @@ class CSVModel: public QAbstractTableModel {
   Q_OBJECT
 
 public:
+  enum ColumnName {
+    eDate = 0,
+    eCategory = 1,
+    eOperationType = 2,
+    eLabel = 3,
+    eDebit = 4,
+    eCredit = 5
+  };
+
   explicit CSVModel(QObject* p_parent = nullptr);
 
   int rowCount(QModelIndex const&) const override { return m_data.rowCount(); }
   int columnCount(QModelIndex const&) const override { return m_data.columnCount(); }
 
+  QVariant headerData(int p_section, Qt::Orientation p_orientation, int p_role) const override;
   QVariant data(QModelIndex const& p_index, int p_role = Qt::DisplayRole) const override;
-  bool setData(QModelIndex const& p_index, QVariant const& p_value, int p_role = Qt::EditRole) override;
+  //bool setData(QModelIndex const& p_index, QVariant const& p_value, int p_role = Qt::EditRole) override;
   Qt::ItemFlags flags(QModelIndex const& p_index) const override;
 
   bool setSource(QString const& p_fileName, bool p_withHeader = true, QChar const& p_delim = ';');
