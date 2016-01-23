@@ -5,7 +5,6 @@
 
 template<typename T>
 class TableData {
-
 public:
   TableData(int p_rowCount = 0, int p_columnCount = 0):
     m_rowCount(p_rowCount),
@@ -113,10 +112,6 @@ public:
   Qt::ItemFlags flags(QModelIndex const& p_index) const override;
 
   bool setSource(QString const& p_fileName, bool p_withHeader = true, QChar const& p_delim = ';');
-
-signals:
-
-public slots:
 
 private:
   TableData<QString> m_data;

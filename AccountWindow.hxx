@@ -6,17 +6,15 @@
 class CSVModel;
 class QTableView;
 
-class AccountWindow : public QWidget
-{
+class AccountWindow: public QWidget {
   Q_OBJECT
+
 public:
-  explicit AccountWindow(QWidget *parent = 0);
-
-signals:
-
-public slots:
+  explicit AccountWindow(QWidget* parent = nullptr);
 
 private:
+  void fillModel();
+
   CSVModel* m_csvModel;
   QTableView* m_tableView;
 };

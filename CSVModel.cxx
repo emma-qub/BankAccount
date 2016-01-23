@@ -6,19 +6,26 @@
 #include <QFont>
 
 CSVModel::CSVModel(QObject* p_parent):
-QAbstractTableModel(p_parent) {
+  QAbstractTableModel(p_parent) {
 }
 
 QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
   if (p_index.isValid()) {
+    auto column = p_index.column();
     if (p_role == Qt::DisplayRole || p_role == Qt::EditRole) {
-      return m_data.at(p_index.row(), p_index.column());
-    } else if (p_role == Qt::ForegroundRole && p_index.column() == eCredit) {
+      return m_data.at(p_index.row(), column);
+    } else if (p_role == Qt::ForegroundRole && column == eCredit) {
       return QColor("#80c342");
-    } else if (p_role == Qt::FontRole && p_index.column() == eCredit) {
+    } else if (p_role == Qt::FontRole && column == eCredit) {
       QFont font;
       font.setBold(true);
       return font;
+    } else if (p_role == Qt::TextAlignmentRole) {
+      if (column == eDate || column == eCategory) {
+        return Qt::AlignCenter;
+      } else if (column == eDebit || column == eCredit) {
+        return Qt::AlignRight;
+      }
     }
   }
   return QVariant();

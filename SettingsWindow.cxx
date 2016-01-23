@@ -2,5 +2,4 @@
 
 SettingsWindow::SettingsWindow(QWidget* p_parent):
   QWidget(p_parent) {
-
 }

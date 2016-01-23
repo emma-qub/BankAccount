@@ -9,8 +9,7 @@ class SettingsWindow;
 
 class QTabWidget;
 
-class MainWindow: public QMainWindow
-{
+class MainWindow: public QMainWindow {
   Q_OBJECT
 
 public:
@@ -22,7 +21,6 @@ private:
   AccountWindow* m_accountWindow;
   ChartWindow* m_chartWindow;
   SettingsWindow* m_settingsWindow;
-
 };
 
 #endif // MAINWINDOW_HXX

@@ -8,10 +8,6 @@ class ChartWindow: public QWidget {
 
 public:
   explicit ChartWindow(QWidget* p_parent = nullptr);
-
-signals:
-
-public slots:
 };
 
 #endif // CHARTWIDGET_HXX
