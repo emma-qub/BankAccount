@@ -22,6 +22,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(
   }
 
   QTextStream in(&rawCSV);
+  in.setAutoDetectUnicode(true);
   QString line;
   QString newLine;
   if (p_hasHeader) {
@@ -53,9 +54,9 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(
     QString debit;
     QString credit;
     if (amount < 0) {
-      debit = QString::number(amount, 'f', 2);
+      debit = QString::number(amount, 'f', 2)+"€";
     } else {
-      credit = QString::number(amount, 'f', 2);
+      credit = QString::number(amount, 'f', 2)+"€";
     }
 
     // Concat everything

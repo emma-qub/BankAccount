@@ -16,7 +16,7 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
       return m_data.at(p_index.row(), column);
     } else if (p_role == Qt::ForegroundRole && column == eCredit) {
       return QColor("#80c342");
-    } else if (p_role == Qt::FontRole && column == eCredit) {
+    } else if (p_role == Qt::FontRole && (column == eDebit|| column == eCredit)) {
       QFont font;
       font.setBold(true);
       return font;
