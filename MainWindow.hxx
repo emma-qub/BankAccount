@@ -21,6 +21,8 @@ private:
   AccountWindow* m_accountWindow;
   ChartWindow* m_chartWindow;
   SettingsWindow* m_settingsWindow;
+
+  QAction* m_updateOperationsAction;
 };
 
 #endif // MAINWINDOW_HXX

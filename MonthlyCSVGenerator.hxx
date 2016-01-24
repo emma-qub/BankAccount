@@ -3,7 +3,9 @@
 
 #include <exception>
 #include <string>
+
 #include <QChar>
+#include <QDate>
 
 class QString;
 
@@ -11,7 +13,7 @@ class MonthlyCSVGenerator {
 public:
   MonthlyCSVGenerator();
 
-  static void convertRawCSVToMonthlyCSV(QString const& p_inFileName, QString const& p_outFileName, const QChar& p_delim = ';', bool p_hasHeader = true);
+  static void convertRawCSVToMonthlyCSV(const QDate& p_date, QString const& p_inFileName, const QChar& p_delim = ';', bool p_hasHeader = true);
 
 private:
   static QString getOperationType(QString const& p_operationType);
