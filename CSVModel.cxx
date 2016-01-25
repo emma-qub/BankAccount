@@ -24,7 +24,7 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
       if (column == eDate || column == eCategory) {
         return Qt::AlignCenter;
       } else if (column == eDebit || column == eCredit) {
-        return static_cast<int>(Qt::AlignVCenter | Qt::AlignRight);
+        return QVariant(Qt::AlignVCenter | Qt::AlignRight);
       }
     }
   }
