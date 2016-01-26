@@ -87,10 +87,13 @@ Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
 }
 
 bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QChar& p_delim) {
+  beginResetModel();
   m_data.clear();
 
   QFile file(p_fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    m_data.append(QStringList() << "" << "" << "" << "" << "" << "");
+    endResetModel();
     return false;
   }
 
@@ -104,6 +107,9 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
     m_data.append(tokensList);
   }
   file.close();
+
+  endResetModel();
+  //emit this->dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
 
   return true;
 }

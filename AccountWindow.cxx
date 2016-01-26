@@ -15,7 +15,8 @@
 AccountWindow::AccountWindow(QWidget* parent):
   QWidget(parent) {
 
-  auto currentDate = QDate::currentDate();
+  QDate currentDate = QDate::currentDate();
+  currentDate = currentDate.addMonths(-1);
   m_month = currentDate.month();
   m_year = currentDate.year();
 
@@ -53,6 +54,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   connect(m_nextYear, SIGNAL(clicked()), this, SLOT(goToNextYear()));
   connect(this, SIGNAL(yearChanged()), this, SLOT(updateYear()));
   connect(this, SIGNAL(monthChanged()), this, SLOT(updateMonth()));
+  connect(this, SIGNAL(monthChanged()), this, SLOT(fillModel()));
 
   auto dateLayout = new QHBoxLayout;
   dateLayout->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding, QSizePolicy::Preferred));
@@ -136,6 +138,6 @@ void AccountWindow::updateYear() {
 }
 
 void AccountWindow::fillModel() {
-  MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate::currentDate(), "../BankAccount/csv/raw.csv");
-  m_csvModel->setSource("../BankAccount/csv/"+QDate::currentDate().toString("MM-yyyy")+"/operations.csv");
+  //MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate::currentDate(), "../BankAccount/csv/raw.csv");
+  m_csvModel->setSource("../BankAccount/csv/"+QDate(m_year, m_month, 1).toString("MM-yyyy")+"/operations.csv");
 }

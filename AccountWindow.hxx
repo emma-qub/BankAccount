@@ -21,14 +21,13 @@ private slots:
   void goToNextYear();
   void updateMonth();
   void updateYear();
+  void fillModel();
 
 signals:
   void monthChanged();
   void yearChanged();
 
 private:
-  void fillModel();
-
   CSVModel* m_csvModel;
   QTableView* m_tableView;
 
