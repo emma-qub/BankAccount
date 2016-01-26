@@ -108,10 +108,13 @@ public:
 
   QVariant headerData(int p_section, Qt::Orientation p_orientation, int p_role) const override;
   QVariant data(QModelIndex const& p_index, int p_role = Qt::DisplayRole) const override;
-  //bool setData(QModelIndex const& p_index, QVariant const& p_value, int p_role = Qt::EditRole) override;
+  bool setData(QModelIndex const& p_index, QVariant const& p_value, int p_role = Qt::EditRole) override;
   Qt::ItemFlags flags(QModelIndex const& p_index) const override;
 
   bool setSource(QString const& p_fileName, bool p_withHeader = false, QChar const& p_delim = ';');
+
+signals:
+  void saveCategoryRequested(int, QString const&);
 
 private:
   TableData<QString> m_data;

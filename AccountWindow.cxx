@@ -2,6 +2,7 @@
 
 #include "CSVModel.hxx"
 #include "MonthlyCSVGenerator.hxx"
+#include "CategoryItemDelegate.hxx"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -16,7 +17,6 @@ AccountWindow::AccountWindow(QWidget* parent):
   QWidget(parent) {
 
   QDate currentDate = QDate::currentDate();
-  currentDate = currentDate.addMonths(-1);
   m_month = currentDate.month();
   m_year = currentDate.year();
 
@@ -72,6 +72,7 @@ AccountWindow::AccountWindow(QWidget* parent):
 
   m_csvModel = new CSVModel(this);
   fillModel();
+  connect(m_csvModel, SIGNAL(saveCategoryRequested(int, QString const&)), this, SLOT(saveCategory(int, QString const&)));
 
   auto proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setSourceModel(m_csvModel);
@@ -85,6 +86,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   }
   m_tableView->setFocusPolicy(Qt::NoFocus);
   m_tableView->setSelectionMode(QTableView::NoSelection);
+  m_tableView->setItemDelegateForColumn(CSVModel::eCategory, new CategoryItemDelegate);
   //m_tableView->setSortingEnabled(true);
   //m_tableView->sortByColumn(0, Qt::AscendingOrder);
 
@@ -93,6 +95,10 @@ AccountWindow::AccountWindow(QWidget* parent):
   mainLayout->addWidget(m_tableView);
 
   setLayout(mainLayout);
+}
+
+QString AccountWindow::getCurrentCSVFileName() const {
+  return QString("../BankAccount/csv/"+QDate(m_year, m_month, 1).toString("MM-yyyy")+"/operations.csv");
 }
 
 void AccountWindow::goToPreviousYear() {
@@ -143,5 +149,9 @@ void AccountWindow::updateYear() {
 
 void AccountWindow::fillModel() {
   //MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate::currentDate(), "../BankAccount/csv/raw.csv");
-  m_csvModel->setSource("../BankAccount/csv/"+QDate(m_year, m_month, 1).toString("MM-yyyy")+"/operations.csv");
+  m_csvModel->setSource(getCurrentCSVFileName());
+}
+
+void AccountWindow::saveCategory(int p_row, QString const& p_category) {
+  MonthlyCSVGenerator::saveCategory(p_row, p_category, getCurrentCSVFileName());
 }

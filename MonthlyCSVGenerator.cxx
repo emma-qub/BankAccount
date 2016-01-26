@@ -113,6 +113,25 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date,
   formatedCSV.close();
 }
 
+void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_category, const QString& p_inFileName) {
+  QFile inFile(p_inFileName);
+  if (!inFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
+    throw open_failure(p_inFileName.toStdString().c_str());
+  }
+
+  auto fileLines = inFile.readAll().split('\n');
+  auto concernedOperationTokens = fileLines.at(p_row).split(';');
+  concernedOperationTokens.replace(1, p_category.toStdString().c_str());
+  auto newLine = concernedOperationTokens.join(';');
+  fileLines.replace(p_row, newLine);
+  auto newText = fileLines.join('\n');
+
+  inFile.seek(0);
+  inFile.write(newText);
+
+  inFile.close();
+}
+
 QString MonthlyCSVGenerator::getOperationType(QString const& p_operationType) {
   QString operationType = p_operationType;
 

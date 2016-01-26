@@ -5,6 +5,8 @@
 #include <QColor>
 #include <QFont>
 
+#include <QDebug>
+
 CSVModel::CSVModel(QObject* p_parent):
   QAbstractTableModel(p_parent) {
 }
@@ -70,12 +72,16 @@ QVariant CSVModel::headerData(int p_section, Qt::Orientation p_orientation, int 
   return QVariant();
 }
 
-//bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int p_role) {
-//  if (p_index.isValid() && p_role == Qt::EditRole) {
-//    return m_data.setValue(p_index.row(), p_index.column(), p_value.toString());
-//  }
-//  return false;
-//}
+bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int p_role) {
+  if (p_index.isValid() && p_role == Qt::EditRole && p_index.column() == eCategory) {
+    auto result = m_data.setValue(p_index.row(), p_index.column(), p_value.toString());
+    if (result) {
+      emit saveCategoryRequested(p_index.row(), p_value.toString());
+    }
+    return result;
+  }
+  return false;
+}
 
 Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(p_index);
@@ -92,6 +98,7 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
 
   QFile file(p_fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    // Create empty line, in order to prevent view from being reset
     m_data.append(QStringList() << "" << "" << "" << "" << "" << "");
     endResetModel();
     return false;
@@ -109,7 +116,6 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
   file.close();
 
   endResetModel();
-  //emit this->dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
 
   return true;
 }

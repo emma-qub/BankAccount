@@ -14,6 +14,7 @@ public:
   MonthlyCSVGenerator();
 
   static void convertRawCSVToMonthlyCSV(const QDate& p_date, QString const& p_inFileName, const QChar& p_delim = ';', bool p_hasHeader = true);
+  static void saveCategory(int p_row, QString const& p_category, QString const& p_inFileName);
 
 private:
   static QString getOperationType(QString const& p_operationType);

@@ -16,13 +16,15 @@ SOURCES += main.cxx\
     AccountWindow.cxx \
     ChartWindow.cxx \
     SettingsWindow.cxx \
-    MonthlyCSVGenerator.cxx
+    MonthlyCSVGenerator.cxx \
+    CategoryItemDelegate.cxx
 
 HEADERS  += MainWindow.hxx \
     CSVModel.hxx \
     AccountWindow.hxx \
     ChartWindow.hxx \
     SettingsWindow.hxx \
-    MonthlyCSVGenerator.hxx
+    MonthlyCSVGenerator.hxx \
+    CategoryItemDelegate.hxx
 
 CONFIG += C++11

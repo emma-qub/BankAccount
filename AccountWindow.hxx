@@ -14,7 +14,10 @@ class AccountWindow: public QWidget {
 public:
   explicit AccountWindow(QWidget* parent = nullptr);
 
-private slots:
+protected:
+  QString getCurrentCSVFileName() const;
+
+protected slots:
   void goToPreviousYear();
   void goToPreviousMonth();
   void goToNextMonth();
@@ -22,6 +25,7 @@ private slots:
   void updateMonth();
   void updateYear();
   void fillModel();
+  void saveCategory(int p_row, const QString& p_category);
 
 signals:
   void monthChanged();
