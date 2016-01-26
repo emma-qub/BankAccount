@@ -26,6 +26,7 @@ private slots:
 signals:
   void monthChanged();
   void yearChanged();
+  void updateModelRequested();
 
 private:
   CSVModel* m_csvModel;

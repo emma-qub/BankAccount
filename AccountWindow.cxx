@@ -54,7 +54,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   connect(m_nextYear, SIGNAL(clicked()), this, SLOT(goToNextYear()));
   connect(this, SIGNAL(yearChanged()), this, SLOT(updateYear()));
   connect(this, SIGNAL(monthChanged()), this, SLOT(updateMonth()));
-  connect(this, SIGNAL(monthChanged()), this, SLOT(fillModel()));
+  connect(this, SIGNAL(updateModelRequested()), this, SLOT(fillModel()));
 
   auto dateLayout = new QHBoxLayout;
   dateLayout->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding, QSizePolicy::Preferred));
@@ -98,6 +98,7 @@ AccountWindow::AccountWindow(QWidget* parent):
 void AccountWindow::goToPreviousYear() {
   m_year--;
   emit yearChanged();
+  emit updateModelRequested();
 }
 
 void AccountWindow::goToPreviousMonth() {
@@ -110,6 +111,7 @@ void AccountWindow::goToPreviousMonth() {
     m_month--;
 
   emit monthChanged();
+  emit updateModelRequested();
 }
 
 void AccountWindow::goToNextMonth() {
@@ -122,11 +124,13 @@ void AccountWindow::goToNextMonth() {
     m_month++;
 
   emit monthChanged();
+  emit updateModelRequested();
 }
 
 void AccountWindow::goToNextYear() {
   m_year++;
   emit yearChanged();
+  emit updateModelRequested();
 }
 
 void AccountWindow::updateMonth() {
