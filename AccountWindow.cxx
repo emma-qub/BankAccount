@@ -10,11 +10,18 @@
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QDate>
+#include <QAction>
+#include <QFileDialog>
 
 #include <QDebug>
 
 AccountWindow::AccountWindow(QWidget* parent):
   QWidget(parent) {
+
+  auto reloadAction = new QAction("Reload data...", this);
+  reloadAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_R));
+  connect(reloadAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
+  addAction(reloadAction);
 
   QDate currentDate = QDate::currentDate();
   m_month = currentDate.month();
@@ -148,10 +155,22 @@ void AccountWindow::updateYear() {
 }
 
 void AccountWindow::fillModel() {
-  //MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate::currentDate(), "../BankAccount/csv/raw.csv");
   m_csvModel->setSource(getCurrentCSVFileName());
 }
 
 void AccountWindow::saveCategory(int p_row, QString const& p_category) {
   MonthlyCSVGenerator::saveCategory(p_row, p_category, getCurrentCSVFileName());
+}
+
+void AccountWindow::reloadFile() {
+  auto csvFileName = QFileDialog::getOpenFileName(this, "Import CSV file", "../BankAccount/csv", "CSV files (*.csv *.CSV)");
+  if (csvFileName.isEmpty()) {
+    return;
+  }
+
+  auto currentDate = QDate(m_year, m_month, 1);
+  MonthlyCSVGenerator::updateRawCSV(currentDate, csvFileName);
+  MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(currentDate);
+
+  fillModel();
 }

@@ -14,40 +14,22 @@
 MonthlyCSVGenerator::MonthlyCSVGenerator() {
 }
 
-void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date,
-  QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
+void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim) {
 
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = p_date.toString("MM-yyyy");
   QString accountDirectoryPath = csvDirectoryPath+QDir::separator()+accountDirectoryName;
+  QString inFilePath = accountDirectoryPath+QDir::separator()+"raw.csv";
 
-  QDir csvDirectory(csvDirectoryPath);
-  QDir accountDirectory(accountDirectoryPath);
-  if (!accountDirectory.exists()) {
-    csvDirectory.mkdir(accountDirectoryName);
-  }
-
-  QString rawCSVName = "raw.csv";
-  QString rawCSVPath = accountDirectoryPath+QDir::separator()+rawCSVName;
-  QFile existingRawCSV(rawCSVPath);
-  if (existingRawCSV.exists()) {
-    qDebug() << "Raw CSV exists";
-  } else {
-    qDebug() << "Raw CSV doesn't exist";
-  }
-
-  QFile rawCSV(p_inFileName);
+  QFile rawCSV(inFilePath);
   if (!rawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    throw open_failure(p_inFileName.toStdString().c_str());
+    throw open_failure(rawCSV.errorString().toStdString().c_str());
   }
 
   QTextStream in(&rawCSV);
   in.setAutoDetectUnicode(true);
   QString line;
   QString newLine;
-  if (p_hasHeader) {
-    line = in.readLine();
-  }
 
   while (!(line = in.readLine()).isEmpty()) {
     auto tokens = line.split(p_delim);
@@ -92,23 +74,23 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date,
 
   QFile formatedCSV(accountDirectoryPath+QDir::separator()+"operations.csv");
   QTextStream out(&formatedCSV);
-  QString existingOperations;
+//  QString existingOperations;
 
-  if (formatedCSV.exists()) {
-    if (!formatedCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      throw open_failure(p_inFileName.toStdString().c_str(), true);
-    }
+//  if (formatedCSV.exists()) {
+//    if (!formatedCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
+//      throw open_failure(formatedCSV.errorString().toStdString().c_str(), true);
+//    }
 
-    existingOperations = out.readAll();
-    formatedCSV.close();
-    out.flush();
-  }
+//    existingOperations = out.readAll();
+//    formatedCSV.close();
+//    out.flush();
+//  }
 
   if (!formatedCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw open_failure(p_inFileName.toStdString().c_str(), false);
+    throw open_failure(formatedCSV.errorString().toStdString().c_str(), false);
   }
 
-  out << newLine << existingOperations;
+  out << newLine/* << existingOperations*/;
 
   formatedCSV.close();
 }
@@ -116,7 +98,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date,
 void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_category, const QString& p_inFileName) {
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
-    throw open_failure(p_inFileName.toStdString().c_str());
+    throw open_failure(inFile.errorString().toStdString().c_str());
   }
 
   auto fileLines = inFile.readAll().split('\n');
@@ -156,3 +138,67 @@ QString MonthlyCSVGenerator::getOperationType(QString const& p_operationType) {
   return operationType;
 }
 
+void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
+  QString csvDirectoryPath = "../BankAccount/csv";
+  QString accountDirectoryName = p_date.toString("MM-yyyy");
+  QString accountDirectoryPath = csvDirectoryPath+QDir::separator()+accountDirectoryName;
+
+  QDir csvDirectory(csvDirectoryPath);
+  QDir accountDirectory(accountDirectoryPath);
+  if (!accountDirectory.exists()) {
+    csvDirectory.mkdir(accountDirectoryName);
+  }
+
+  QString firstLine;
+  QString rawCSVName = "raw.csv";
+  QString rawCSVPath = accountDirectoryPath+QDir::separator()+rawCSVName;
+  QFile existingRawCSV(rawCSVPath);
+  auto rawCSVAlreadyExists = existingRawCSV.exists();
+  if (rawCSVAlreadyExists) {
+    qDebug() << "Raw CSV exists";
+    if (!existingRawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      throw open_failure(existingRawCSV.errorString().toStdString().c_str());
+    }
+    firstLine = existingRawCSV.readLine();
+  } else {
+    qDebug() << "Raw CSV doesn't exist";
+  }
+
+  QFile inFile(p_inFileName);
+  if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    throw open_failure(inFile.errorString().toStdString().c_str());
+  }
+
+  if (p_hasHeader) {
+    inFile.readLine();
+  }
+
+  QByteArray newLines;
+  QString currentLine;
+  while (!(currentLine = inFile.readLine()).isEmpty()) {
+    if (rawCSVAlreadyExists && currentLine == firstLine) {
+      existingRawCSV.seek(0);
+      newLines += existingRawCSV.readAll();
+      existingRawCSV.close();
+      break;
+    }
+    QStringList tokens = currentLine.split(p_delim);
+    int currentMonth = tokens.at(0).split('/').at(1).toInt();
+    if (currentMonth != p_date.month()) {
+      continue;
+    }
+    newLines += currentLine;
+  }
+
+  existingRawCSV.close();
+  inFile.close();
+
+  if (!existingRawCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    throw open_failure(existingRawCSV.errorString().toStdString().c_str(), false);
+  }
+
+  existingRawCSV.seek(0);
+  existingRawCSV.write(newLines);
+
+  existingRawCSV.close();
+}

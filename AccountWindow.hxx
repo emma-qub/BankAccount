@@ -26,6 +26,7 @@ protected slots:
   void updateYear();
   void fillModel();
   void saveCategory(int p_row, const QString& p_category);
+  void reloadFile();
 
 signals:
   void monthChanged();
