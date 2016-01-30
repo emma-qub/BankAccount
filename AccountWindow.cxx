@@ -170,7 +170,6 @@ void AccountWindow::reloadFile() {
 
   auto currentDate = QDate(m_year, m_month, 1);
   MonthlyCSVGenerator::updateRawCSV(currentDate, csvFileName);
-  MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(currentDate);
 
   fillModel();
 }

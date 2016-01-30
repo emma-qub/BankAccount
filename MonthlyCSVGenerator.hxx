@@ -13,7 +13,8 @@ class MonthlyCSVGenerator {
 public:
   MonthlyCSVGenerator();
 
-  static void convertRawCSVToMonthlyCSV(const QDate& p_date, const QChar& p_delim = ';');
+  static void convertRawCSVToMonthlyCSV(const QDate& p_date, const QChar& p_delim = ';',
+    const QString& p_outputFileName = "operations.csv", const QString& p_rawFileName = "raw.csv");
   static void saveCategory(int p_row, QString const& p_category, QString const& p_inFileName);
   static void updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim = ';', bool p_hasHeader = true);
 

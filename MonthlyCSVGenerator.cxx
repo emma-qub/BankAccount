@@ -14,12 +14,13 @@
 MonthlyCSVGenerator::MonthlyCSVGenerator() {
 }
 
-void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim) {
+void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim,
+  const QString& p_outputFileName, const QString& p_rawFileName) {
 
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = p_date.toString("MM-yyyy");
   QString accountDirectoryPath = csvDirectoryPath+QDir::separator()+accountDirectoryName;
-  QString inFilePath = accountDirectoryPath+QDir::separator()+"raw.csv";
+  QString inFilePath = accountDirectoryPath+QDir::separator()+p_rawFileName;
 
   QFile rawCSV(inFilePath);
   if (!rawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -72,7 +73,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 
   rawCSV.close();
 
-  QFile formatedCSV(accountDirectoryPath+QDir::separator()+"operations.csv");
+  QFile formatedCSV(accountDirectoryPath+QDir::separator()+p_outputFileName);
   QTextStream out(&formatedCSV);
 //  QString existingOperations;
 
@@ -149,21 +150,20 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
     csvDirectory.mkdir(accountDirectoryName);
   }
 
+  // Get first line of raw csv if it already exists
   QString firstLine;
   QString rawCSVName = "raw.csv";
   QString rawCSVPath = accountDirectoryPath+QDir::separator()+rawCSVName;
   QFile existingRawCSV(rawCSVPath);
   auto rawCSVAlreadyExists = existingRawCSV.exists();
   if (rawCSVAlreadyExists) {
-    qDebug() << "Raw CSV exists";
     if (!existingRawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
       throw open_failure(existingRawCSV.errorString().toStdString().c_str());
     }
     firstLine = existingRawCSV.readLine();
-  } else {
-    qDebug() << "Raw CSV doesn't exist";
   }
 
+  // Read bank operation csv file
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw open_failure(inFile.errorString().toStdString().c_str());
@@ -175,11 +175,10 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
 
   QByteArray newLines;
   QString currentLine;
+  QByteArray existingRawLines;
   while (!(currentLine = inFile.readLine()).isEmpty()) {
     if (rawCSVAlreadyExists && currentLine == firstLine) {
-      existingRawCSV.seek(0);
-      newLines += existingRawCSV.readAll();
-      existingRawCSV.close();
+      existingRawLines = existingRawCSV.readAll();
       break;
     }
     QStringList tokens = currentLine.split(p_delim);
@@ -193,12 +192,59 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   existingRawCSV.close();
   inFile.close();
 
+  // Write new lines in a temp raw csv file
+  auto rawTempName = QString("rawTemp.csv");
+  QFile rawTemp(accountDirectoryPath+QDir::separator()+rawTempName);
+
+  if (!rawTemp.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    throw open_failure(rawTemp.errorString().toStdString().c_str(), false);
+  }
+
+  rawTemp.write(newLines);
+  rawTemp.close();
+
+  // Convert operation from temp raw csv file to temp operation csv file
+  auto operationTempName = QString("operationTemp.csv");
+  convertRawCSVToMonthlyCSV(p_date, p_delim, operationTempName, rawTempName);
+
+  // Add temp raw csv file content at the beginning of existing raw csv file
   if (!existingRawCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
     throw open_failure(existingRawCSV.errorString().toStdString().c_str(), false);
   }
 
   existingRawCSV.seek(0);
   existingRawCSV.write(newLines);
+  existingRawCSV.write(existingRawLines);
 
   existingRawCSV.close();
+
+  // Clean temp raw csv file
+  accountDirectory.remove(rawTempName);
+
+  // Add new operations at the beginning of operation csv file
+  QFile tempOperation(accountDirectoryPath+QDir::separator()+operationTempName);
+  if (!tempOperation.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    throw open_failure(tempOperation.errorString().toStdString().c_str());
+  }
+
+  auto newOperations = tempOperation.readAll();
+  tempOperation.close();
+
+  QFile existingOperation(accountDirectoryPath+QDir::separator()+"operations.csv");
+  if (!existingOperation.open(QIODevice::ReadWrite | QIODevice::Text)) {
+    throw open_failure(existingOperation.errorString().toStdString().c_str());
+  }
+
+  auto operations = existingOperation.readAll();
+
+  existingOperation.seek(0);
+  existingOperation.write(newOperations);
+  existingOperation.write(operations);
+
+  existingOperation.close();
+
+  // Clean temp operation csv file
+  accountDirectory.remove(operationTempName);
+
+
 }
