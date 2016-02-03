@@ -22,6 +22,7 @@ QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptio
           << "Dessin"
           << "Divers"
           << "Don"
+          << "EDF"
           << "Escalade"
           << "Free"
           << "LEGO"
