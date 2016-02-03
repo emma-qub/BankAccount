@@ -32,7 +32,11 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
   QString line;
   QString newLine;
 
-  while (!(line = in.readLine()).isEmpty()) {
+  while (!in.atEnd()) {
+    line = in.readLine();
+    if (line.isEmpty()) {
+      continue;
+    }
     auto tokens = line.split(p_delim);
 
     // Handle date
@@ -176,7 +180,11 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   QByteArray newLines;
   QString currentLine;
   QByteArray existingRawLines;
-  while (!(currentLine = inFile.readLine()).isEmpty()) {
+  while (!inFile.atEnd()) {
+    currentLine = inFile.readLine();
+    if (currentLine.isEmpty()) {
+      continue;
+    }
     if (rawCSVAlreadyExists && currentLine == firstLine) {
       existingRawLines = existingRawCSV.readAll();
       break;

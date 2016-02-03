@@ -109,7 +109,11 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
   if (p_withHeader) {
     currentLine = in.readLine();
   }
-  while (!(currentLine = in.readLine()).isEmpty()) {
+  while (!in.atEnd()) {
+    currentLine = in.readLine();
+    if (currentLine.isEmpty()) {
+      continue;
+    }
     auto tokensList = currentLine.split(p_delim);
     m_data.append(tokensList);
   }
