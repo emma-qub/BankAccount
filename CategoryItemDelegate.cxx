@@ -31,6 +31,7 @@ QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptio
           << "Loisirs"
           << "Loyer"
           << "Meubles"
+          << "Note de frais"
           << "PEL"
           << "Restaurant"
           << "Salaire"
