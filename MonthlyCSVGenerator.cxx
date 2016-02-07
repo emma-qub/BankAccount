@@ -119,30 +119,6 @@ void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_category, con
   inFile.close();
 }
 
-QString MonthlyCSVGenerator::getOperationType(QString const& p_operationType) {
-  QString operationType = p_operationType;
-
-  if (p_operationType == "FACTURE CARTE") {
-    operationType = "CB";
-  } else if (p_operationType == "CHEQUE") {
-    operationType = "Chèque";
-  } else if (p_operationType == "VIR SEPA EMIS") {
-    operationType = "Virement émis";
-  } else if (p_operationType == "PRLV SEPA") {
-    operationType = "Prélèvement";
-  } else if (p_operationType == "COMMISSIONS") {
-    operationType = "Commissions";
-  } else if (p_operationType == "VIR SEPA RECU") {
-    operationType = "Virement reçu";
-  } else if (p_operationType == "VIRT CPTE A CPTE EMIS") {
-    operationType = "Transfert émis";
-  } else if (p_operationType == "VIRT CPTE A CPTE RECU") {
-    operationType = "Transfert reçu";
-  }
-
-  return operationType;
-}
-
 void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = p_date.toString("MM-yyyy");
@@ -254,5 +230,56 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   // Clean temp operation csv file
   accountDirectory.remove(operationTempName);
 
+  // Clean operations
+  CleanOperations(accountDirectoryPath+QDir::separator()+"operations.csv");
+}
 
+void MonthlyCSVGenerator::CleanOperations(QString const& p_fileName) {
+  QFile in(p_fileName);
+  if (!in.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    throw open_failure(in.errorString().toStdString().c_str());
+  }
+
+  QString currentLine;
+  QByteArray cleanContent;
+  while (!in.atEnd()) {
+    currentLine = in.readLine();
+    if (currentLine.count(';') == 5) {
+      cleanContent += currentLine;
+    }
+  }
+
+  in.close();
+
+  QFile out(p_fileName);
+  if (!out.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    throw open_failure(out.errorString().toStdString().c_str(), false);
+  }
+
+  out.write(cleanContent);
+  out.close();
+}
+
+QString MonthlyCSVGenerator::getOperationType(QString const& p_operationType) {
+  QString operationType = p_operationType;
+
+  if (p_operationType == "FACTURE CARTE") {
+    operationType = "CB";
+  } else if (p_operationType == "CHEQUE") {
+    operationType = "Chèque";
+  } else if (p_operationType == "VIR SEPA EMIS") {
+    operationType = "Virement émis";
+  } else if (p_operationType == "PRLV SEPA") {
+    operationType = "Prélèvement";
+  } else if (p_operationType == "COMMISSIONS") {
+    operationType = "Commissions";
+  } else if (p_operationType == "VIR SEPA RECU") {
+    operationType = "Virement reçu";
+  } else if (p_operationType == "VIRT CPTE A CPTE EMIS") {
+    operationType = "Transfert émis";
+  } else if (p_operationType == "VIRT CPTE A CPTE RECU") {
+    operationType = "Transfert reçu";
+  }
+
+  return operationType;
 }

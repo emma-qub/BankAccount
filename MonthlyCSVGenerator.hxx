@@ -18,6 +18,9 @@ public:
   static void saveCategory(int p_row, QString const& p_category, QString const& p_inFileName);
   static void updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim = ';', bool p_hasHeader = true);
 
+protected:
+  static void CleanOperations(const QString& p_fileName);
+
 private:
   static QString getOperationType(QString const& p_operationType);
 };
