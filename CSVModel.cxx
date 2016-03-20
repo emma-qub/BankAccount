@@ -16,9 +16,14 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
     auto column = p_index.column();
     if (p_role == Qt::DisplayRole || p_role == Qt::EditRole) {
       return m_data.at(p_index.row(), column);
-    } else if (p_role == Qt::ForegroundRole && column == eCredit) {
-      return QColor("#80c342");
-    } else if (p_role == Qt::FontRole && (column == eDebit|| column == eCredit)) {
+    } else if (p_role == Qt::ForegroundRole) {
+      if (column == eCredit) {
+        return QColor("#80c342");
+      } else if (column == eCategory && p_index.data() == "Unknown") {
+        return QColor("#f58000");
+      }
+    } else if (p_role == Qt::FontRole &&
+      (column == eDebit|| column == eCredit || (column == eCategory && p_index.data() == "Unknown"))) {
       QFont font;
       font.setBold(true);
       return font;
