@@ -82,6 +82,13 @@ public:
     ++m_rowCount;
   }
 
+  void appendEmptyLine() {
+    QStringList emptyLine;
+    for (int k = 0; k < m_columnCount; ++k)
+      emptyLine << "";
+    m_data.append(emptyLine);
+  }
+
 private:
   QList<QList<T>> m_data;
   int m_rowCount;

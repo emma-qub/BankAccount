@@ -104,7 +104,7 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
   QFile file(p_fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
     // Create empty line, in order to prevent view from being reset
-    m_data.append(QStringList() << "" << "" << "" << "" << "" << "");
+    m_data.appendEmptyLine();
     endResetModel();
     return false;
   }
