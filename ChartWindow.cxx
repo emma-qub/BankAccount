@@ -1,22 +1,30 @@
 #include "ChartWindow.hxx"
 
-#include "qcustomplot.hxx"
+#include "MonthlyChartGenerator.hxx"
 
-ChartWindow::ChartWindow(QWidget* p_parent):
-  QWidget(p_parent) {
+ChartWindow::ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_parent):
+  QWidget(p_parent),
+  m_model(p_model),
+  m_year(p_year),
+  m_month(p_month) {
 
-  auto customPlot = new QCustomPlot;
-  auto myBar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
-  customPlot->addPlottable(myBar);
-  myBar->addData(
-    QVector<double>() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12,
-    QVector<double>() << 140 << 137 << 209 << 176 << 150 << 157 << 152 << 137 << 149 << 148 << 152 << 187);
-  customPlot->xAxis->setRange(0, 13);
-  customPlot->yAxis->setRange(0, 210);
-  customPlot->setFixedSize(600, 400);
+  m_monthlyChartGenerator = new MonthlyChartGenerator(m_model, m_year, m_month, this);
+  m_mainLayout = new QVBoxLayout;
+  m_chartView = m_monthlyChartGenerator->createChartView();
 
-  auto mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(customPlot);
+  m_mainLayout->addWidget(m_chartView);
 
-  setLayout(mainLayout);
+  setLayout(m_mainLayout);
+}
+
+void ChartWindow::updateChart(int p_year, int p_month) {
+  m_year = p_year;
+  m_month = p_month;
+  m_monthlyChartGenerator->setYear(m_year);
+  m_monthlyChartGenerator->setMonth(m_month);
+
+  m_mainLayout->removeWidget(m_chartView);
+  delete m_chartView;
+  m_chartView = m_monthlyChartGenerator->createChartView();
+  m_mainLayout->addWidget(m_chartView);
 }

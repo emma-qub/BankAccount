@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent):
   QMainWindow(parent) {
 
   m_accountWindow = new AccountWindow;
-  m_chartWindow = new ChartWindow;
+  m_chartWindow = new ChartWindow(m_accountWindow->getModel(), m_accountWindow->getYear(), m_accountWindow->getMonth());
   m_settingsWindow = new SettingsWindow;
 
   m_tabWidget = new QTabWidget;
@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget* parent):
   m_tabWidget->setIconSize(QSize(96, 96));
   m_tabWidget->setTabPosition(QTabWidget::West);
   m_tabWidget->setFocusPolicy(Qt::NoFocus);
+
+  connect(m_tabWidget, &QTabWidget::currentChanged, this, [this](int p_tab) {
+    if (p_tab == 1) {
+      m_chartWindow->updateChart(m_accountWindow->getYear(), m_accountWindow->getMonth());
+    }
+  });
 
   QString tabBarStyle;
   tabBarStyle += "QTabBar::tab {";

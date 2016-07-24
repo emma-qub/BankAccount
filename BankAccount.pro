@@ -4,7 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += \
+    core \
+    gui \
+    charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = BankAccount
@@ -19,7 +22,7 @@ SOURCES += \
     SettingsWindow.cxx \
     MonthlyCSVGenerator.cxx \
     CategoryItemDelegate.cxx \
-    qcustomplot.cxx
+    MonthlyChartGenerator.cxx
 
 HEADERS  += \
     MainWindow.hxx \
@@ -29,6 +32,6 @@ HEADERS  += \
     SettingsWindow.hxx \
     MonthlyCSVGenerator.hxx \
     CategoryItemDelegate.hxx \
-    qcustomplot.hxx
+    MonthlyChartGenerator.hxx
 
 CONFIG += C++11

@@ -14,6 +14,10 @@ class AccountWindow: public QWidget {
 public:
   explicit AccountWindow(QWidget* parent = nullptr);
 
+  inline CSVModel* getModel() const {return m_csvModel;}
+  inline int getYear() const {return m_year;}
+  inline int getMonth() const {return m_month;}
+
 protected:
   QString getCurrentCSVFileName() const;
 
