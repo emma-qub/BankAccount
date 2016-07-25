@@ -3,7 +3,6 @@
 #include "CSVModel.hxx"
 
 #include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
 #include <QtCharts/QLegend>
 #include <QtCharts/QBarCategoryAxis>
 #include <QRegularExpression>
@@ -33,7 +32,6 @@ QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
       *barSet << 0;
       barSetsVector.append(barSet);
       categoriesList << category;
-      series->append(barSet);
       categoryIndex = categoriesList.size()-1;
     }
 
@@ -44,6 +42,10 @@ QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
     newAmount -= creditStr.remove(creditStr.length()-1, 1).toFloat();
     barSetsVector.value(categoryIndex)->replace(0, newAmount);
   }
+
+  qSort(barSetsVector.begin(), barSetsVector.end(), lessThan);
+  for (auto barSet: barSetsVector)
+    series->append(barSet);
 
   auto chart = new QChart;
   chart->addSeries(series);
@@ -57,4 +59,8 @@ QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
   chartView->setRenderHint(QPainter::Antialiasing);
 
   return chartView;
+}
+
+bool lessThan(QBarSet const* p_barSet1, QBarSet const* p_barSet2) {
+  return p_barSet1->at(0) < p_barSet2->at(0);
 }

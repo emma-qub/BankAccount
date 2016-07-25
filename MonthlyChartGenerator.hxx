@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDate>
 #include <QtCharts/QChartView>
+#include <QtCharts/QBarSet>
 
 class CSVModel;
 
@@ -22,5 +23,7 @@ private:
   int m_year;
   int m_month;
 };
+
+bool lessThan(QtCharts::QBarSet const* p_barSet1, QtCharts::QBarSet const* p_barSet2);
 
 #endif // MONTHLYCHARTGENERATOR_HXX
