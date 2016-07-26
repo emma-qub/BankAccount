@@ -35,7 +35,7 @@ QtCharts::QChartView* CategoryChartGenerator::createChartView() {
   QDate currDate = m_beginDate;
   while (currDate <= m_endDate)
   {
-    auto barSet = new QBarSet(currDate.toString("MM yyyy"), this);
+    auto barSet = new QBarSet(currDate.toString("MMMM yyyy"), this);
     *barSet << getCategoryAmount(currDate);
     series->append(barSet);
     currDate = currDate.addMonths(1);
