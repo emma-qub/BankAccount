@@ -1,5 +1,7 @@
 #include "CategoryItemDelegate.hxx"
 
+#include "Utils.hxx"
+
 #include <QComboBox>
 
 CategoryItemDelegate::CategoryItemDelegate(QWidget* p_parent):
@@ -10,46 +12,7 @@ CategoryItemDelegate::CategoryItemDelegate(QWidget* p_parent):
 QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptionViewItem& p_option, const QModelIndex& p_index) const {
   if (p_index.isValid() && p_index.column() == 1) {
     auto editor = new QComboBox(p_parent);
-    editor->addItems(
-          QStringList()
-          << "Assurance"
-          << "Banque"
-          << "Cadeau donné"
-          << "Cadeau reçu"
-          << "Cinéma"
-          << "Coiffeur"
-          << "Courses"
-          << "Deezer"
-          << "Dessin"
-          << "Divers"
-          << "Don"
-          << "EDF"
-          << "Escalade"
-          << "Électronique"
-          << "Free"
-          << "Impôts"
-          << "Jeux vidéo"
-          << "LaPoste"
-          << "LEGO"
-          << "Livres"
-          << "Livret A"
-          << "Loisirs"
-          << "Loyer"
-          << "Médecin"
-          << "Meubles"
-          << "Note de frais"
-          << "PEL"
-          << "Pharmacie"
-          << "Pokémon"
-          << "Restaurant"
-          << "Retrait"
-          << "Salaire"
-          << "SNCF"
-          << "Qwerty"
-          << "Transports"
-          << "Vêtements"
-          << "Unknown"
-          );
+    editor->addItems(Utils::CATEGORIES);
     return editor;
   } else {
     return QStyledItemDelegate::createEditor(p_parent, p_option, p_index);

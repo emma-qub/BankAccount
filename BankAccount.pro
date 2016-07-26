@@ -22,7 +22,9 @@ SOURCES += \
     SettingsWindow.cxx \
     MonthlyCSVGenerator.cxx \
     CategoryItemDelegate.cxx \
-    MonthlyChartGenerator.cxx
+    MonthlyChartGenerator.cxx \
+    CategoryChartGenerator.cxx \
+    Utils.cxx
 
 HEADERS  += \
     MainWindow.hxx \
@@ -32,6 +34,8 @@ HEADERS  += \
     SettingsWindow.hxx \
     MonthlyCSVGenerator.hxx \
     CategoryItemDelegate.hxx \
-    MonthlyChartGenerator.hxx
+    MonthlyChartGenerator.hxx \
+    CategoryChartGenerator.hxx \
+    Utils.hxx
 
 CONFIG += C++11

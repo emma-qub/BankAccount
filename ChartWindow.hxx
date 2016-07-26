@@ -2,11 +2,13 @@
 #define CHARTWIDGET_HXX
 
 #include "MonthlyChartGenerator.hxx"
+#include "CategoryChartGenerator.hxx"
 #include "CSVModel.hxx"
 
 #include <QWidget>
-#include <QVBoxLayout>
+#include <QGridLayout>
 #include <QChartView>
+#include <QComboBox>
 
 class ChartWindow: public QWidget {
   Q_OBJECT
@@ -16,15 +18,23 @@ public:
   inline int getYear() const {return m_year;}
   inline int getMonth() const {return m_month;}
 
-  void updateChart(int p_year, int p_month);
+  void updateMonthlyChart(int p_year, int p_month);
+
+protected slots:
+  void updateCategoryChart(const QString& p_category);
 
 private:
   CSVModel* m_model;
   int m_year;
   int m_month;
   MonthlyChartGenerator* m_monthlyChartGenerator;
-  QVBoxLayout* m_mainLayout;
-  QtCharts::QChartView* m_chartView;
+  QVBoxLayout* m_categoryChartLayout;
+  QVBoxLayout* m_monthlyChartLayout;
+  QGridLayout* m_mainLayout;
+  QtCharts::QChartView* m_monthlyChartView;
+  QtCharts::QChartView* m_categoryChartView;
+  QComboBox* m_categoryComboBox;
+  CategoryChartGenerator* m_categoryChartGenerator;
 };
 
 #endif // CHARTWIDGET_HXX

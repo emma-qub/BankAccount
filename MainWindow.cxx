@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget* parent):
 
   connect(m_tabWidget, &QTabWidget::currentChanged, this, [this](int p_tab) {
     if (p_tab == 1) {
-      m_chartWindow->updateChart(m_accountWindow->getYear(), m_accountWindow->getMonth());
+      m_chartWindow->updateMonthlyChart(m_accountWindow->getYear(), m_accountWindow->getMonth());
     }
   });
 
