@@ -7,12 +7,12 @@ ChartWindow::ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_
   m_year(p_year),
   m_month(p_month) {
 
+  m_tabWidget = new QTabWidget;
+
   m_monthlyChartGenerator = new MonthlyChartGenerator(m_model, m_year, m_month, this);
-  m_mainLayout = new QGridLayout;
+  m_mainLayout = new QVBoxLayout;
   m_monthlyChartView = m_monthlyChartGenerator->createChartView();
-  m_monthlyChartLayout = new QVBoxLayout;
-  m_monthlyChartLayout->addWidget(m_monthlyChartView);
-  m_mainLayout->addLayout(m_monthlyChartLayout, 0, 0);
+  m_tabWidget->addTab(m_monthlyChartView, "Monthly");
 
   m_categoryComboBox = new QComboBox;
   m_categoryComboBox->addItems(Utils::CATEGORIES);
@@ -22,8 +22,11 @@ ChartWindow::ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_
   m_categoryChartLayout->addWidget(m_categoryComboBox, 0, Qt::AlignCenter);
   m_categoryChartView = m_categoryChartGenerator->createChartView();
   m_categoryChartLayout->addWidget(m_categoryChartView);
+  auto categoryWidget = new QWidget;
+  categoryWidget->setLayout(m_categoryChartLayout);
+  m_tabWidget->addTab(categoryWidget, "Categories");
 
-  m_mainLayout->addLayout(m_categoryChartLayout, 1, 0);
+  m_mainLayout->addWidget(m_tabWidget);
 
   setLayout(m_mainLayout);
 }
@@ -34,10 +37,10 @@ void ChartWindow::updateMonthlyChart(int p_year, int p_month) {
   m_monthlyChartGenerator->setYear(m_year);
   m_monthlyChartGenerator->setMonth(m_month);
 
-  m_monthlyChartLayout->removeWidget(m_monthlyChartView);
+  m_tabWidget->removeTab(0);
   delete m_monthlyChartView;
   m_monthlyChartView = m_monthlyChartGenerator->createChartView();
-  m_monthlyChartLayout->addWidget(m_monthlyChartView);
+  m_tabWidget->insertTab(0, m_monthlyChartView, "Monthly");
 }
 
 void ChartWindow::updateCategoryChart(QString const& p_category) {

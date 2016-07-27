@@ -7,8 +7,8 @@
 
 #include <QWidget>
 #include <QGridLayout>
-#include <QChartView>
 #include <QComboBox>
+#include <QtCharts/QChartView>
 
 class ChartWindow: public QWidget {
   Q_OBJECT
@@ -29,12 +29,12 @@ private:
   int m_month;
   MonthlyChartGenerator* m_monthlyChartGenerator;
   QVBoxLayout* m_categoryChartLayout;
-  QVBoxLayout* m_monthlyChartLayout;
-  QGridLayout* m_mainLayout;
+  QVBoxLayout* m_mainLayout;
   QtCharts::QChartView* m_monthlyChartView;
   QtCharts::QChartView* m_categoryChartView;
   QComboBox* m_categoryComboBox;
   CategoryChartGenerator* m_categoryChartGenerator;
+  QTabWidget* m_tabWidget;
 };
 
 #endif // CHARTWIDGET_HXX
