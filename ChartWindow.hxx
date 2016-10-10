@@ -3,6 +3,8 @@
 
 #include "MonthlyChartGenerator.hxx"
 #include "CategoryChartGenerator.hxx"
+#include "MonthlyBalanceGenerator.hxx"
+#include "BalanceWindow.hxx"
 #include "CSVModel.hxx"
 
 #include <QWidget>
@@ -19,6 +21,7 @@ public:
   inline int getMonth() const {return m_month;}
 
   void updateMonthlyChart(int p_year, int p_month);
+  void updateMonthlyBalance(int p_year, int p_month);
 
 protected slots:
   void updateCategoryChart(const QString& p_category);
@@ -34,6 +37,8 @@ private:
   QtCharts::QChartView* m_categoryChartView;
   QComboBox* m_categoryComboBox;
   CategoryChartGenerator* m_categoryChartGenerator;
+  BalanceWindow* m_balanceWidget;
+  MonthlyBalanceGenerator* m_monthlyBalanceGenerator;
   QTabWidget* m_tabWidget;
 };
 

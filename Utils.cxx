@@ -30,6 +30,7 @@ QStringList const Utils::CATEGORIES =
     << "Loyer"
     << "Médecin"
     << "Meubles"
+    << "Musée"
     << "Note de frais"
     << "PEL"
     << "Pharmacie"

@@ -24,7 +24,9 @@ SOURCES += \
     CategoryItemDelegate.cxx \
     MonthlyChartGenerator.cxx \
     CategoryChartGenerator.cxx \
-    Utils.cxx
+    Utils.cxx \
+    BalanceWindow.cxx \
+    MonthlyBalanceGenerator.cxx
 
 HEADERS  += \
     MainWindow.hxx \
@@ -36,6 +38,8 @@ HEADERS  += \
     CategoryItemDelegate.hxx \
     MonthlyChartGenerator.hxx \
     CategoryChartGenerator.hxx \
-    Utils.hxx
+    Utils.hxx \
+    BalanceWindow.hxx \
+    MonthlyBalanceGenerator.hxx
 
 CONFIG += C++11
