@@ -5,6 +5,7 @@ Utils::Utils() {
 
 QStringList const Utils::CATEGORIES =
   QStringList()
+    << "Adobe"
     << "Assurance"
     << "Banque"
     << "Cadeau donné"
