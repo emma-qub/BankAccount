@@ -8,6 +8,7 @@
 #include <QDate>
 #include <QRegularExpression>
 #include <QDir>
+#include <QByteArrayList>
 
 #include <QDebug>
 
@@ -24,7 +25,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 
   QFile rawCSV(inFilePath);
   if (!rawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    throw open_failure(rawCSV.errorString().toStdString().c_str());
+    throw OpenFailure(rawCSV.errorString().toStdString().c_str());
   }
 
   QTextStream in(&rawCSV);
@@ -83,7 +84,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 
 //  if (formatedCSV.exists()) {
 //    if (!formatedCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//      throw open_failure(formatedCSV.errorString().toStdString().c_str(), true);
+//      throw OpenFailure(formatedCSV.errorString().toStdString().c_str(), true);
 //    }
 
 //    existingOperations = out.readAll();
@@ -92,7 +93,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 //  }
 
   if (!formatedCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw open_failure(formatedCSV.errorString().toStdString().c_str(), false);
+    throw OpenFailure(formatedCSV.errorString().toStdString().c_str(), false);
   }
 
   out << newLine/* << existingOperations*/;
@@ -103,7 +104,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_category, const QString& p_inFileName) {
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
-    throw open_failure(inFile.errorString().toStdString().c_str());
+    throw OpenFailure(inFile.errorString().toStdString().c_str());
   }
 
   auto fileLines = inFile.readAll().split('\n');
@@ -138,7 +139,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   auto rawCSVAlreadyExists = existingRawCSV.exists();
   if (rawCSVAlreadyExists) {
     if (!existingRawCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      throw open_failure(existingRawCSV.errorString().toStdString().c_str());
+      throw OpenFailure(existingRawCSV.errorString().toStdString().c_str());
     }
     firstLine = existingRawCSV.readLine();
   }
@@ -146,7 +147,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   // Read bank operation csv file
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    throw open_failure(inFile.errorString().toStdString().c_str());
+    throw OpenFailure(inFile.errorString().toStdString().c_str());
   }
 
   if (p_hasHeader) {
@@ -181,7 +182,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   QFile rawTemp(accountDirectoryPath+QDir::separator()+rawTempName);
 
   if (!rawTemp.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw open_failure(rawTemp.errorString().toStdString().c_str(), false);
+    throw OpenFailure(rawTemp.errorString().toStdString().c_str(), false);
   }
 
   rawTemp.write(newLines);
@@ -193,7 +194,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
 
   // Add temp raw csv file content at the beginning of existing raw csv file
   if (!existingRawCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw open_failure(existingRawCSV.errorString().toStdString().c_str(), false);
+    throw OpenFailure(existingRawCSV.errorString().toStdString().c_str(), false);
   }
 
   existingRawCSV.seek(0);
@@ -208,7 +209,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   // Add new operations at the beginning of operation csv file
   QFile tempOperation(accountDirectoryPath+QDir::separator()+operationTempName);
   if (!tempOperation.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    throw open_failure(tempOperation.errorString().toStdString().c_str());
+    throw OpenFailure(tempOperation.errorString().toStdString().c_str());
   }
 
   auto newOperations = tempOperation.readAll();
@@ -216,7 +217,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
 
   QFile existingOperation(accountDirectoryPath+QDir::separator()+"operations.csv");
   if (!existingOperation.open(QIODevice::ReadWrite | QIODevice::Text)) {
-    throw open_failure(existingOperation.errorString().toStdString().c_str());
+    throw OpenFailure(existingOperation.errorString().toStdString().c_str());
   }
 
   auto operations = existingOperation.readAll();
@@ -234,10 +235,43 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   CleanOperations(accountDirectoryPath+QDir::separator()+"operations.csv");
 }
 
+void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
+  QFile xlsFile(p_csvFileName);
+  if (!xlsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    throw OpenFailure(xlsFile.errorString().toStdString().c_str());
+  }
+
+  p_csvFileName.replace("xls", "csv");
+  QFile csvFile(p_csvFileName);
+  if (!csvFile.open(QIODevice::Append | QIODevice::Text)) {
+    throw OpenFailure(csvFile.errorString().toStdString().c_str());
+  }
+
+  while (xlsFile.atEnd() == false) {
+    auto byteArrayList = xlsFile.readLine().split('\t');
+    if (byteArrayList.at(4).contains("01056 102355U")) {
+      continue;
+    }
+
+    QByteArray label = byteArrayList.at(4).trimmed();
+    if (label.isEmpty()) {
+      label = byteArrayList.at(5).trimmed();
+    }
+
+    QByteArray value = byteArrayList.at(1);
+    value.replace(',', '.');
+
+    QByteArrayList newLineStringList;
+    newLineStringList << byteArrayList.at(0).trimmed() << "_" << byteArrayList.at(2) << label << value;
+
+    csvFile.write(newLineStringList.join(';')+"\n");
+  }
+}
+
 void MonthlyCSVGenerator::CleanOperations(QString const& p_fileName) {
   QFile in(p_fileName);
   if (!in.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    throw open_failure(in.errorString().toStdString().c_str());
+    throw OpenFailure(in.errorString().toStdString().c_str());
   }
 
   QString currentLine;
@@ -253,7 +287,7 @@ void MonthlyCSVGenerator::CleanOperations(QString const& p_fileName) {
 
   QFile out(p_fileName);
   if (!out.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw open_failure(out.errorString().toStdString().c_str(), false);
+    throw OpenFailure(out.errorString().toStdString().c_str(), false);
   }
 
   out.write(cleanContent);

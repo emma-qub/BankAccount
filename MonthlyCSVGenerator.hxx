@@ -17,6 +17,7 @@ public:
     const QString& p_outputFileName = "operations.csv", const QString& p_rawFileName = "raw.csv");
   static void saveCategory(int p_row, QString const& p_category, QString const& p_inFileName);
   static void updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim = ';', bool p_hasHeader = true);
+  static void convertXLSToCSV(QString& p_xlsFileName);
 
 protected:
   static void CleanOperations(const QString& p_fileName);
@@ -25,9 +26,9 @@ private:
   static QString getOperationType(QString const& p_operationType);
 };
 
-class open_failure: public std::exception {
+class OpenFailure: public std::exception {
 public:
-  open_failure(std::string const& fileName, bool p_readMode = true):
+  OpenFailure(std::string const& fileName, bool p_readMode = true):
     m_fileName(fileName),
     m_readMode(p_readMode) {
   }

@@ -163,9 +163,13 @@ void AccountWindow::saveCategory(int p_row, QString const& p_category) {
 }
 
 void AccountWindow::reloadFile() {
-  auto csvFileName = QFileDialog::getOpenFileName(this, "Import CSV file", "../BankAccount/csv", "CSV files (*.csv *.CSV)");
+  auto csvFileName = QFileDialog::getOpenFileName(this, "Import CSV file", "../BankAccount/csv", "EXEL files (*.xls *.XLS);;CSV files (*.csv *.CSV)");
   if (csvFileName.isEmpty()) {
     return;
+  }
+
+  if (csvFileName.endsWith("xls")) {
+    MonthlyCSVGenerator::convertXLSToCSV(csvFileName);
   }
 
   auto currentDate = QDate(m_year, m_month, 1);
