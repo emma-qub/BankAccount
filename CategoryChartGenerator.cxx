@@ -65,6 +65,7 @@ float CategoryChartGenerator::getCategoryAmount(const QDate p_date) const {
   }
 
   QTextStream in(&file);
+  in.setCodec("UTF-8");
   QString currentLine;
   while (!in.atEnd()) {
     currentLine = in.readLine();

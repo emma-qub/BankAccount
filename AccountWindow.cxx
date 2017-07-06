@@ -20,7 +20,7 @@ AccountWindow::AccountWindow(QWidget* parent):
 
   auto reloadAction = new QAction("Reload data...", this);
   reloadAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_R));
-  connect(reloadAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
+  connect(reloadAction, &QAction::triggered, this, &AccountWindow::reloadFile);
   addAction(reloadAction);
 
   QDate currentDate = QDate::currentDate();
@@ -55,13 +55,13 @@ AccountWindow::AccountWindow(QWidget* parent):
   m_nextYear->setFont(font);
   m_nextYear->setFixedSize(m_nextYear->sizeHint().height(), m_nextYear->sizeHint().height());
 
-  connect(m_previousYear, SIGNAL(clicked()), this, SLOT(goToPreviousYear()));
-  connect(m_previousMonth, SIGNAL(clicked()), this, SLOT(goToPreviousMonth()));
-  connect(m_nextMonth, SIGNAL(clicked()), this, SLOT(goToNextMonth()));
-  connect(m_nextYear, SIGNAL(clicked()), this, SLOT(goToNextYear()));
-  connect(this, SIGNAL(yearChanged()), this, SLOT(updateYear()));
-  connect(this, SIGNAL(monthChanged()), this, SLOT(updateMonth()));
-  connect(this, SIGNAL(updateModelRequested()), this, SLOT(fillModel()));
+  connect(m_previousYear, &QPushButton::clicked, this, &AccountWindow::goToPreviousYear);
+  connect(m_previousMonth, &QPushButton::clicked, this, &AccountWindow::goToPreviousMonth);
+  connect(m_nextMonth, &QPushButton::clicked, this, &AccountWindow::goToNextMonth);
+  connect(m_nextYear, &QPushButton::clicked, this, &AccountWindow::goToNextYear);
+  connect(this, &AccountWindow::yearChanged, this, &AccountWindow::updateYear);
+  connect(this, &AccountWindow::monthChanged, this, &AccountWindow::updateMonth);
+  connect(this, &AccountWindow::updateModelRequested, this, &AccountWindow::fillModel);
 
   auto dateLayout = new QHBoxLayout;
   dateLayout->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding, QSizePolicy::Preferred));
@@ -79,7 +79,7 @@ AccountWindow::AccountWindow(QWidget* parent):
 
   m_csvModel = new CSVModel(this);
   fillModel();
-  connect(m_csvModel, SIGNAL(saveCategoryRequested(int, QString const&)), this, SLOT(saveCategory(int, QString const&)));
+  connect(m_csvModel, &CSVModel::saveCategoryRequested, this, &AccountWindow::saveCategory);
 
   auto proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setSourceModel(m_csvModel);
@@ -89,11 +89,13 @@ AccountWindow::AccountWindow(QWidget* parent):
   m_tableView->setAlternatingRowColors(true);
   m_tableView->verticalHeader()->hide();
   if (m_csvModel->rowCount() > 0) {
-    m_tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    m_tableView->horizontalHeader()->setSectionResizeMode(CSVModel::eLabel, QHeaderView::Stretch);
   }
   m_tableView->setFocusPolicy(Qt::NoFocus);
   m_tableView->setSelectionMode(QTableView::NoSelection);
   m_tableView->setItemDelegateForColumn(CSVModel::eCategory, new CategoryItemDelegate);
+  m_tableView->setItemDelegateForColumn(CSVModel::eGroup, new CategoryItemDelegate);
+  m_tableView->setSortingEnabled(true);
   //m_tableView->setSortingEnabled(true);
   //m_tableView->sortByColumn(0, Qt::AscendingOrder);
 
@@ -156,10 +158,12 @@ void AccountWindow::updateYear() {
 
 void AccountWindow::fillModel() {
   m_csvModel->setSource(getCurrentCSVFileName());
+  if (m_csvModel->rowCount() > 0)
+    m_tableView->horizontalHeader()->setSectionResizeMode(CSVModel::eLabel, QHeaderView::Stretch);
 }
 
-void AccountWindow::saveCategory(int p_row, QString const& p_category) {
-  MonthlyCSVGenerator::saveCategory(p_row, p_category, getCurrentCSVFileName());
+void AccountWindow::saveCategory(int p_row, const QString& p_group, QString const& p_category) {
+  MonthlyCSVGenerator::saveCategory(p_row, p_group, p_category, getCurrentCSVFileName());
 }
 
 void AccountWindow::reloadFile() {

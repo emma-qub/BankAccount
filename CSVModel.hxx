@@ -101,11 +101,14 @@ class CSVModel: public QAbstractTableModel {
 public:
   enum ColumnName {
     eDate = 0,
-    eCategory = 1,
-    eOperationType = 2,
-    eLabel = 3,
-    eDebit = 4,
-    eCredit = 5
+    eGroup,
+    eCategory,
+    eOperationType,
+    eLabel,
+    eDebit,
+    eCredit,
+
+    eColumnCount
   };
 
   explicit CSVModel(QObject* p_parent = nullptr);
@@ -121,7 +124,7 @@ public:
   bool setSource(QString const& p_fileName, bool p_withHeader = false, QChar const& p_delim = ';');
 
 signals:
-  void saveCategoryRequested(int, QString const&);
+  void saveCategoryRequested(int, QString const&, QString const&);
 
 private:
   TableData<QString> m_data;

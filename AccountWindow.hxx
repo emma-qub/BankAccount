@@ -29,7 +29,7 @@ protected slots:
   void updateMonth();
   void updateYear();
   void fillModel();
-  void saveCategory(int p_row, const QString& p_category);
+  void saveCategory(int p_row, const QString& p_group, const QString& p_category);
   void reloadFile();
 
 signals:

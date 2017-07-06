@@ -17,9 +17,9 @@ ChartWindow::ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_
 
   // Category
   m_categoryComboBox = new QComboBox;
-  m_categoryComboBox->addItems(Utils::CATEGORIES);
+  m_categoryComboBox->addItems(Utils::getCategories());
   connect(m_categoryComboBox, &QComboBox::currentTextChanged, this, &ChartWindow::updateCategoryChart);
-  m_categoryChartGenerator = new CategoryChartGenerator(m_categoryComboBox->currentText(), QDate(2016, 1, 1), QDate(2016, 12, 1));
+  m_categoryChartGenerator = new CategoryChartGenerator(m_categoryComboBox->currentText(), QDate(2017, 1, 1), QDate(2017, 12, 1));
   m_categoryChartLayout = new QVBoxLayout;
   m_categoryChartLayout->addWidget(m_categoryComboBox, 0, Qt::AlignCenter);
   m_categoryChartView = m_categoryChartGenerator->createChartView();
