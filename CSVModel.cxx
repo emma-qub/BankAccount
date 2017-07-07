@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QColor>
 #include <QFont>
+#include <QRegularExpression>
 
 #include <QDebug>
 
@@ -142,4 +143,16 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
   endResetModel();
 
   return true;
+}
+
+float CSVModel::getCredit(int p_row) {
+  return getAmount(p_row, eCredit);
+}
+
+float CSVModel::getDebit(int p_row) {
+  return getAmount(p_row, eDebit);
+}
+
+float CSVModel::getAmount(int p_row, ColumnName p_column) {
+  return m_data[p_row][p_column].remove("€").toFloat();
 }

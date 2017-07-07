@@ -3,10 +3,12 @@
 #include "CSVModel.hxx"
 #include "MonthlyCSVGenerator.hxx"
 #include "CategoryItemDelegate.hxx"
+#include "Utils.hxx"
 
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFormLayout>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QDate>
@@ -78,7 +80,6 @@ AccountWindow::AccountWindow(QWidget* parent):
   dateLayout->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding, QSizePolicy::Preferred));
 
   m_csvModel = new CSVModel(this);
-  fillModel();
   connect(m_csvModel, &CSVModel::saveCategoryRequested, this, &AccountWindow::saveCategory);
 
   auto proxyModel = new QSortFilterProxyModel(this);
@@ -99,9 +100,41 @@ AccountWindow::AccountWindow(QWidget* parent):
   //m_tableView->setSortingEnabled(true);
   //m_tableView->sortByColumn(0, Qt::AscendingOrder);
 
-  auto mainLayout = new QVBoxLayout;
-  mainLayout->addLayout(dateLayout);
+  auto summaryLayout = new QVBoxLayout;
+  m_salaryLabel = new QLabel;
+  auto salaryLayout = new QFormLayout;
+  salaryLayout->addRow("Salaire :", m_salaryLabel);
+  summaryLayout->addLayout(salaryLayout);
+  m_fixedChargesLabel = new QLabel;
+  auto fixedChargesLayout = new QFormLayout;
+  fixedChargesLayout->addRow("Charges fixes :", m_fixedChargesLabel);
+  summaryLayout->addLayout(fixedChargesLayout);
+  m_variableChargesLabel = new QLabel;
+  auto variableChargesLayout = new QFormLayout;
+  variableChargesLayout->addRow("Charge variables :", m_variableChargesLabel);
+  summaryLayout->addLayout(variableChargesLayout);
+  m_foodLabel = new QLabel;
+  auto foodLayout = new QFormLayout;
+  foodLayout->addRow("Nourriture :", m_foodLabel);
+  summaryLayout->addLayout(foodLayout);
+  m_savingLabel = new QLabel;
+  auto savingLayout = new QFormLayout;
+  savingLayout->addRow("Épargne :", m_savingLabel);
+  summaryLayout->addLayout(savingLayout);
+  summaryLayout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
+  summaryLayout->setContentsMargins(15, 50, 0, 0);
+
+  auto summaryAndDateLayout = new QVBoxLayout;
+  summaryAndDateLayout->addLayout(dateLayout);
+  summaryAndDateLayout->addLayout(summaryLayout);
+
+  auto mainLayout = new QHBoxLayout;
+  mainLayout->addLayout(summaryAndDateLayout);
   mainLayout->addWidget(m_tableView);
+  mainLayout->setStretchFactor(summaryAndDateLayout, 0);
+  mainLayout->setStretchFactor(m_tableView, 1);
+
+  fillModel();
 
   setLayout(mainLayout);
 }
@@ -158,12 +191,62 @@ void AccountWindow::updateYear() {
 
 void AccountWindow::fillModel() {
   m_csvModel->setSource(getCurrentCSVFileName());
-  if (m_csvModel->rowCount() > 0 && m_tableView && m_tableView->horizontalHeader())
+  if (m_csvModel->rowCount() > 0) {
     m_tableView->horizontalHeader()->setSectionResizeMode(CSVModel::eLabel, QHeaderView::Stretch);
+  }
+
+  updateSummary();
 }
 
 void AccountWindow::saveCategory(int p_row, const QString& p_group, QString const& p_category) {
   MonthlyCSVGenerator::saveCategory(p_row, p_group, p_category, getCurrentCSVFileName());
+}
+
+void AccountWindow::updateSummary() {
+  float salary = 0;
+  float fixedCharges = 0;
+  float variableCharges = 0;
+  float food = 0;
+  float saving = 0;
+
+  for (int row = 0; row < m_csvModel->rowCount(); ++row) {
+    QString groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
+    float credit = m_csvModel->getCredit(row);
+    float debit = m_csvModel->getDebit(row);
+    Utils::Group group = Utils::getGroupFromGroupName(groupName);
+    switch(group) {
+    case Utils::eSalary: {
+      salary += credit + debit;
+      break;
+    }
+    case Utils::eFixedCharges: {
+      fixedCharges += credit + debit;
+      break;
+    }
+    case Utils::eVariableCharges: {
+      variableCharges += credit + debit;
+      break;
+    }
+    case Utils::eFood: {
+      food += credit + debit;
+      break;
+    }
+    case Utils::eSaving: {
+      saving += credit + debit;
+      break;
+    }
+    case Utils::eUnknown:
+    default: {
+      break;
+    }
+    }
+  }
+
+  m_salaryLabel->setText(QString::number(salary, 'f', 2));
+  m_fixedChargesLabel->setText(QString::number(fixedCharges, 'f', 2));
+  m_variableChargesLabel->setText(QString::number(variableCharges, 'f', 2));
+  m_foodLabel->setText(QString::number(food, 'f', 2));
+  m_savingLabel->setText(QString::number(saving, 'f', 2));
 }
 
 void AccountWindow::reloadFile() {
@@ -172,12 +255,14 @@ void AccountWindow::reloadFile() {
     return;
   }
 
+  bool hasHeader = !(csvFileName.endsWith("xls"));
+
   if (csvFileName.endsWith("xls")) {
     MonthlyCSVGenerator::convertXLSToCSV(csvFileName);
   }
 
   auto currentDate = QDate(m_year, m_month, 1);
-  MonthlyCSVGenerator::updateRawCSV(currentDate, csvFileName);
+  MonthlyCSVGenerator::updateRawCSV(currentDate, csvFileName, ';', hasHeader);
 
   fillModel();
 }

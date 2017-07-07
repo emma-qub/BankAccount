@@ -86,7 +86,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
     }
 
     // Concat everything
-    newLines.insert(0, (QStringList() << dayString << group << category << operationType << label << debit << credit).join(';') + "\n");
+    newLines << (QStringList() << dayString << group << category << operationType << label << debit << credit).join(';') + "\n";
   }
 
   // Write new lines
@@ -100,24 +100,36 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
 
 void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_group, const QString& p_category, const QString& p_inFileName) {
   QFile inFile(p_inFileName);
-  if (!inFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
+  if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(inFile.errorString().toStdString().c_str());
   }
 
   QTextStream in(&inFile);
   in.setCodec("UTF-8");
-  auto fileLines = in.readAll().split('\n');
-  auto concernedOperationTokens = fileLines.at(p_row).split(';');
+  QStringList fileLines = in.readAll().split('\n');
+  QStringList concernedOperationTokens = fileLines.at(p_row).split(';');
   concernedOperationTokens.replace(CSVModel::eGroup, p_group.toStdString().c_str());
   concernedOperationTokens.replace(CSVModel::eCategory, p_category.toStdString().c_str());
-  auto newLine = concernedOperationTokens.join(';');
+  QString newLine = concernedOperationTokens.join(';');
   fileLines.replace(p_row, newLine);
-  auto newText = fileLines.join('\n');
-
-  in.seek(0);
-  in << newText;
 
   inFile.close();
+
+  QFile outFile(p_inFileName);
+  if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    throw OpenFailure(outFile.errorString().toStdString().c_str());
+  }
+
+  QTextStream out(&outFile);
+  out.setCodec("UTF-8");
+  for (auto const& line: fileLines) {
+    if (line.count(';') == CSVModel::eColumnCount-1)
+    {
+      out << line << "\n";
+    }
+  }
+
+  outFile.close();
 }
 
 void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
@@ -267,6 +279,8 @@ void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
   QTextStream inCsvFile(&csvFile);
   inCsvFile.setCodec("UTF-8");
 
+  QStringList newLines;
+
   while (inXlsFile.atEnd() == false) {
     auto byteArrayList = inXlsFile.readLine().split('\t');
     if (byteArrayList.at(4).contains("01056 102355U")) {
@@ -284,7 +298,11 @@ void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
     QStringList newLineStringList;
     newLineStringList << byteArrayList.at(0).trimmed() << "_" << byteArrayList.at(2) << label << value;
 
-    inCsvFile << newLineStringList.join(';') << "\n";
+    newLines.insert(0, newLineStringList.join(';')+"\n");
+  }
+
+  for (auto const newLine: newLines) {
+    inCsvFile << newLine;
   }
 
   csvFile.close();

@@ -21,6 +21,8 @@ public:
 protected:
   QString getCurrentCSVFileName() const;
 
+  void updateSummary();
+
 protected slots:
   void goToPreviousYear();
   void goToPreviousMonth();
@@ -47,6 +49,12 @@ private:
   QPushButton* m_previousMonth;
   QPushButton* m_nextMonth;
   QPushButton* m_nextYear;
+
+  QLabel* m_salaryLabel;
+  QLabel* m_fixedChargesLabel;
+  QLabel* m_variableChargesLabel;
+  QLabel* m_foodLabel;
+  QLabel* m_savingLabel;
 
   int m_month;
   int m_year;

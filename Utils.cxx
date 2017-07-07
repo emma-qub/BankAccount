@@ -55,17 +55,25 @@ QStringList const Utils::CHARGES_VARIABLES =
     << "SNCF"
     << "Transports"
     << "Travaux"
-    << "Vêtements"
-    << "Unknown";
+    << "Vêtements";
 
-QMap<QString, QStringList> const Utils::CATEGORIES_BY_GROUP =
-    QMap<QString, QStringList>({
-      {"Charges fixes", CHARGES_FIXES},
-      {"Salaire", QStringList() << "Salaire"},
-      {"Nourriture", NOURRITURE},
-      {"Épargne", EPARGNE},
-      {"Charges variables", CHARGES_VARIABLES},
-      {"Unknown", QStringList() << "Unknown"}});
+QMap<QString, Utils::Group> const Utils::GROUP_BY_NAME =
+    QMap<QString, Utils::Group>({
+      {"Salaire", Utils::eSalary},
+      {"Charges fixes", Utils::eFixedCharges},
+      {"Charges variables", Utils::eVariableCharges},
+      {"Nourriture", Utils::eFood},
+      {"Épargne", Utils::eSaving},
+      {"Unknown", Utils::eUnknown}});
+
+QMap<Utils::Group, QStringList> const Utils::CATEGORIES_BY_GROUP =
+    QMap<Utils::Group, QStringList>({
+      {Utils::eSalary, QStringList() << "Salaire"},
+      {Utils::eFixedCharges, CHARGES_FIXES},
+      {Utils::eVariableCharges, CHARGES_VARIABLES},
+      {Utils::eFood, NOURRITURE},
+      {Utils::eSaving, EPARGNE},
+      {Utils::eUnknown, QStringList() << "Unknown"}});
 
 QStringList const Utils::getCategories() {
   QStringList categories;
@@ -77,9 +85,13 @@ QStringList const Utils::getCategories() {
 }
 
 QStringList const Utils::getGroups() {
-  return CATEGORIES_BY_GROUP.keys();
+  return GROUP_BY_NAME.keys();
 }
 
 QStringList const Utils::getCategoriesByGroup(QString const& p_group) {
-  return CATEGORIES_BY_GROUP.value(p_group);
+  return CATEGORIES_BY_GROUP.value(GROUP_BY_NAME.value(p_group));
+}
+
+Utils::Group Utils::getGroupFromGroupName(QString const& p_groupName) {
+  return GROUP_BY_NAME.value(p_groupName);
 }
