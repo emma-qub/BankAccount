@@ -158,7 +158,7 @@ void AccountWindow::updateYear() {
 
 void AccountWindow::fillModel() {
   m_csvModel->setSource(getCurrentCSVFileName());
-  if (m_csvModel->rowCount() > 0)
+  if (m_csvModel->rowCount() > 0 && m_tableView && m_tableView->horizontalHeader())
     m_tableView->horizontalHeader()->setSectionResizeMode(CSVModel::eLabel, QHeaderView::Stretch);
 }
 

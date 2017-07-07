@@ -33,7 +33,15 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
   QTextStream in(&rawCSV);
   in.setCodec("UTF-8");
   QString line;
-  QString newLine;
+  QStringList newLines;
+
+  QFile formatedCSV(accountDirectoryPath+QDir::separator()+p_outputFileName);
+  QTextStream out(&formatedCSV);
+  out.setCodec("UTF-8");
+
+  if (!formatedCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    throw OpenFailure(formatedCSV.errorString().toStdString().c_str(), false);
+  }
 
   while (!in.atEnd()) {
     line = in.readLine();
@@ -50,6 +58,9 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
       continue;
     }
     auto dayString = date.at(0);
+
+    // Handle group
+    QString group("Unknown");
 
     // Handle category
     QString category("Unknown");
@@ -75,35 +86,16 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
     }
 
     // Concat everything
-    newLine += (QStringList() << dayString << category << operationType << label << debit << credit).join(';')+'\n';
+    newLines.insert(0, (QStringList() << dayString << group << category << operationType << label << debit << credit).join(';') + "\n");
   }
 
-  rawCSV.close();
-
-  QFile formatedCSV(accountDirectoryPath+QDir::separator()+p_outputFileName);
-  QTextStream out(&formatedCSV);
-  out.setCodec("UTF-8");
-//  QString existingOperations;
-
-//  if (formatedCSV.exists()) {
-//    if (!formatedCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//      throw OpenFailure(formatedCSV.errorString().toStdString().c_str(), true);
-//    }
-
-//    existingOperations = out.readAll();
-//    formatedCSV.close();
-//    out.flush();
-//  }
-
-  if (!formatedCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    throw OpenFailure(formatedCSV.errorString().toStdString().c_str(), false);
+  // Write new lines
+  for (auto const& newLine: newLines) {
+    out << newLine;
   }
-
-  out << newLine/* << existingOperations*/;
 
   formatedCSV.close();
-
-  cleanOperations(formatedCSV.fileName());
+  rawCSV.close();
 }
 
 void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_group, const QString& p_category, const QString& p_inFileName) {
@@ -184,7 +176,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
     if (currentMonth != p_date.month()) {
       continue;
     }
-    newLines += currentLine;
+    newLines += currentLine + "\n";
   }
 
   existingRawCSV.close();
@@ -292,11 +284,10 @@ void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
     QStringList newLineStringList;
     newLineStringList << byteArrayList.at(0).trimmed() << "_" << byteArrayList.at(2) << label << value;
 
-    inCsvFile << newLineStringList.join(';')+"\n";
+    inCsvFile << newLineStringList.join(';') << "\n";
   }
 
   csvFile.close();
-  cleanOperations(csvFile.fileName());
 }
 
 void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {
@@ -309,7 +300,7 @@ void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {
   in.setCodec("UTF-8");
 
   QString currentLine;
-  QByteArray cleanContent;
+  QStringList cleanContent;
   while (!in.atEnd()) {
     currentLine = in.readLine();
     if (currentLine.count(';') == CSVModel::eColumnCount-1) {
@@ -327,7 +318,9 @@ void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {
   QTextStream out(&outFile);
   out.setCodec("UTF-8");
 
-  out << cleanContent;
+  for (auto const& cleanLine: cleanContent) {
+    out << cleanLine << "\n";
+  }
 
   outFile.close();
 }
