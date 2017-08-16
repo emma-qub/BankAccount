@@ -5,6 +5,7 @@ Utils::Utils() {
 
 QStringList const Utils::EPARGNE =
   QStringList()
+    << "Compte courant"
     << "Livret A"
     << "PEL";
 
@@ -55,7 +56,8 @@ QStringList const Utils::CHARGES_VARIABLES =
     << "SNCF"
     << "Transports"
     << "Travaux"
-    << "Vêtements";
+    << "Vêtements"
+    << "Voyage";
 
 QMap<QString, Utils::Group> const Utils::GROUP_BY_NAME =
     QMap<QString, Utils::Group>({
