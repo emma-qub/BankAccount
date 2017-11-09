@@ -55,6 +55,8 @@ private:
   QLabel* m_variableChargesLabel;
   QLabel* m_foodLabel;
   QLabel* m_savingLabel;
+  QLabel* m_profitLabel;
+  QLabel* m_balanceLabel;
 
   int m_month;
   int m_year;

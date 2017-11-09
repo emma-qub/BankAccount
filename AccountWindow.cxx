@@ -121,6 +121,15 @@ AccountWindow::AccountWindow(QWidget* parent):
   auto savingLayout = new QFormLayout;
   savingLayout->addRow("Épargne :", m_savingLabel);
   summaryLayout->addLayout(savingLayout);
+  m_profitLabel = new QLabel;
+  auto profitLayout = new QFormLayout;
+  profitLayout->addRow("Gain :", m_profitLabel);
+  summaryLayout->addLayout(profitLayout);
+  m_balanceLabel = new QLabel;
+  auto balanceLayout = new QFormLayout;
+  balanceLayout->addRow("Équilibre :", m_balanceLabel);
+  summaryLayout->addLayout(balanceLayout);
+
   summaryLayout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
   summaryLayout->setContentsMargins(15, 50, 0, 0);
 
@@ -208,6 +217,8 @@ void AccountWindow::updateSummary() {
   float variableCharges = 0;
   float food = 0;
   float saving = 0;
+  float profit = 0;
+  float balance = 0;
 
   for (int row = 0; row < m_csvModel->rowCount(); ++row) {
     QString groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
@@ -235,6 +246,10 @@ void AccountWindow::updateSummary() {
       saving += credit + debit;
       break;
     }
+    case Utils::eProfit: {
+      profit += credit + debit;
+      break;
+    }
     case Utils::eUnknown:
     default: {
       break;
@@ -242,11 +257,15 @@ void AccountWindow::updateSummary() {
     }
   }
 
+  balance = salary + fixedCharges + variableCharges + food + saving + profit;
+
   m_salaryLabel->setText(QString::number(salary, 'f', 2));
   m_fixedChargesLabel->setText(QString::number(fixedCharges, 'f', 2));
   m_variableChargesLabel->setText(QString::number(variableCharges, 'f', 2));
   m_foodLabel->setText(QString::number(food, 'f', 2));
   m_savingLabel->setText(QString::number(saving, 'f', 2));
+  m_profitLabel->setText(QString::number(profit, 'f', 2));
+  m_balanceLabel->setText(QString::number(balance, 'f', 2));
 }
 
 void AccountWindow::reloadFile() {

@@ -3,6 +3,12 @@
 Utils::Utils() {
 }
 
+QStringList const Utils::GAIN =
+  QStringList()
+    << "Famille"
+    << "Amis"
+    << "Ventes";
+
 QStringList const Utils::EPARGNE =
   QStringList()
     << "Compte courant"
@@ -20,7 +26,8 @@ QStringList const Utils::CHARGES_FIXES =
     << "Escalade"
     << "Free"
     << "Impôts"
-    << "Loyer";
+    << "Loyer"
+    << "Patreon";
 
 QStringList const Utils::NOURRITURE =
   QStringList()
@@ -30,7 +37,6 @@ QStringList const Utils::NOURRITURE =
 QStringList const Utils::CHARGES_VARIABLES =
   QStringList()
     << "Cadeau donné"
-    << "Cadeau reçu"
     << "Cinéma"
     << "Coiffeur"
     << "Déménagement"
@@ -66,15 +72,17 @@ QMap<QString, Utils::Group> const Utils::GROUP_BY_NAME =
       {"Charges variables", Utils::eVariableCharges},
       {"Nourriture", Utils::eFood},
       {"Épargne", Utils::eSaving},
+      {"Gain", Utils::eProfit},
       {"Unknown", Utils::eUnknown}});
 
 QMap<Utils::Group, QStringList> const Utils::CATEGORIES_BY_GROUP =
     QMap<Utils::Group, QStringList>({
       {Utils::eSalary, QStringList() << "Salaire"},
-      {Utils::eFixedCharges, CHARGES_FIXES},
-      {Utils::eVariableCharges, CHARGES_VARIABLES},
-      {Utils::eFood, NOURRITURE},
-      {Utils::eSaving, EPARGNE},
+      {Utils::eFixedCharges, Utils::CHARGES_FIXES},
+      {Utils::eVariableCharges, Utils::CHARGES_VARIABLES},
+      {Utils::eFood, Utils::NOURRITURE},
+      {Utils::eSaving, Utils::EPARGNE},
+      {Utils::eProfit, Utils::GAIN},
       {Utils::eUnknown, QStringList() << "Unknown"}});
 
 QStringList const Utils::getCategories() {

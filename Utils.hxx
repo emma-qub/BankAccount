@@ -13,11 +13,13 @@ public:
     eVariableCharges,
     eFood,
     eSaving,
+    eProfit,
     eUnknown
   };
 
   Utils();
 
+  static QStringList const GAIN;
   static QStringList const EPARGNE;
   static QStringList const CHARGES_FIXES;
   static QStringList const NOURRITURE;
