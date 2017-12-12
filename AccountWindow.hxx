@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QMap>
 
 class CSVModel;
 class QTableView;
@@ -60,6 +61,9 @@ private:
 
   int m_month;
   int m_year;
+
+  QStringList m_fixedChargesList;
+  QMap<QString, QLabel*> m_fixedChargesLabelsMap;
 };
 
 #endif // ACCOUNTWINDOW_HXX

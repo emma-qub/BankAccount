@@ -109,6 +109,15 @@ AccountWindow::AccountWindow(QWidget* parent):
   auto fixedChargesLayout = new QFormLayout;
   fixedChargesLayout->addRow("Charges fixes :", m_fixedChargesLabel);
   summaryLayout->addLayout(fixedChargesLayout);
+  m_fixedChargesList = Utils::CHARGES_FIXES;
+  auto fixedChargesListLayout = new QVBoxLayout;
+  fixedChargesListLayout->setContentsMargins(10, 0, 0, 0);
+  for (auto const& fixedCharge: m_fixedChargesList) {
+    auto currentFixedChargeLabel = new QLabel(fixedCharge);
+    fixedChargesListLayout->addWidget(currentFixedChargeLabel);
+    m_fixedChargesLabelsMap[fixedCharge] = currentFixedChargeLabel;
+  }
+  summaryLayout->addLayout(fixedChargesListLayout);
   m_variableChargesLabel = new QLabel;
   auto variableChargesLayout = new QFormLayout;
   variableChargesLayout->addRow("Charge variables :", m_variableChargesLabel);
@@ -220,6 +229,13 @@ void AccountWindow::updateSummary() {
   float profit = 0;
   float balance = 0;
 
+  for (auto const& fixedCharge: m_fixedChargesList) {
+    auto currentLabel = m_fixedChargesLabelsMap[fixedCharge];
+    QFont validateFont(currentLabel->font());
+    validateFont.setBold(false);
+    currentLabel->setFont(validateFont);
+  }
+
   for (int row = 0; row < m_csvModel->rowCount(); ++row) {
     QString groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
     float credit = m_csvModel->getCredit(row);
@@ -231,6 +247,12 @@ void AccountWindow::updateSummary() {
       break;
     }
     case Utils::eFixedCharges: {
+      QString categoryName = m_csvModel->index(row, CSVModel::eCategory).data().toString();
+      Q_ASSERT_X(m_fixedChargesList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown fixed charge: %1").arg(categoryName).toStdString().c_str());
+      auto currentLabel = m_fixedChargesLabelsMap[categoryName];
+      QFont validateFont(currentLabel->font());
+      validateFont.setBold(true);
+      currentLabel->setFont(validateFont);
       fixedCharges += credit + debit;
       break;
     }
