@@ -17,7 +17,7 @@ public:
     const QString& p_outputFileName = "operations.csv", const QString& p_rawFileName = "raw.csv");
   static void saveCategory(int p_row, const QString& p_group, QString const& p_category, QString const& p_inFileName);
   static void updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim = ';', bool p_hasHeader = true);
-  static void convertXLSToCSV(QString& p_xlsFileName);
+  static QString convertXLSToCSV(QString const& p_xlsFileName);
 
 protected:
   static void cleanOperations(const QString& p_fileName);

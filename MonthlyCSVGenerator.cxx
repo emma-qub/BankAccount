@@ -261,23 +261,14 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   cleanOperations(existingOperation.fileName());
 }
 
-void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
-  QFile xlsFile(p_csvFileName);
+QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
+  QFile xlsFile(p_xlsFileName);
   if (!xlsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(xlsFile.errorString().toStdString().c_str());
   }
 
   QTextStream inXlsFile(&xlsFile);
   inXlsFile.setCodec("UTF-8");
-
-  p_csvFileName.replace("xls", "csv");
-  QFile csvFile(p_csvFileName);
-  if (!csvFile.open(QIODevice::Append | QIODevice::Text)) {
-    throw OpenFailure(csvFile.errorString().toStdString().c_str());
-  }
-
-  QTextStream inCsvFile(&csvFile);
-  inCsvFile.setCodec("UTF-8");
 
   QStringList newLines;
 
@@ -301,11 +292,26 @@ void MonthlyCSVGenerator::convertXLSToCSV(QString& p_csvFileName) {
     newLines.insert(0, newLineStringList.join(';')+"\n");
   }
 
+  xlsFile.close();
+
+  QString csvFileName = p_xlsFileName;
+  csvFileName.chop(3);
+  csvFileName += "csv";
+  QFile csvFile(csvFileName);
+  if (!csvFile.open(QIODevice::Append | QIODevice::Text)) {
+    throw OpenFailure(csvFile.errorString().toStdString().c_str());
+  }
+
+  QTextStream inCsvFile(&csvFile);
+  inCsvFile.setCodec("UTF-8");
+
   for (auto const newLine: newLines) {
     inCsvFile << newLine;
   }
 
   csvFile.close();
+
+  return csvFileName;
 }
 
 void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {

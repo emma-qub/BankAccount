@@ -291,15 +291,16 @@ void AccountWindow::updateSummary() {
 }
 
 void AccountWindow::reloadFile() {
-  auto csvFileName = QFileDialog::getOpenFileName(this, "Import CSV file", "../BankAccount/csv", "EXEL files (*.xls *.XLS);;CSV files (*.csv *.CSV)");
-  if (csvFileName.isEmpty()) {
+  auto xlsFileName = QFileDialog::getOpenFileName(this, "Import CSV file", "../BankAccount/csv", "EXEL files (*.xls *.XLS);;CSV files (*.csv *.CSV)");
+  if (xlsFileName.isEmpty()) {
     return;
   }
 
-  bool hasHeader = !(csvFileName.endsWith("xls"));
+  bool hasHeader = !(xlsFileName.endsWith("xls"));
+  auto csvFileName = xlsFileName;
 
-  if (csvFileName.endsWith("xls")) {
-    MonthlyCSVGenerator::convertXLSToCSV(csvFileName);
+  if (xlsFileName.endsWith("xls")) {
+    csvFileName = MonthlyCSVGenerator::convertXLSToCSV(xlsFileName);
   }
 
   auto currentDate = QDate(m_year, m_month, 1);
