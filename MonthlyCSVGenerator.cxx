@@ -298,6 +298,21 @@ QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
   csvFileName.chop(3);
   csvFileName += "csv";
   QFile csvFile(csvFileName);
+
+  QStringList csvOperations;
+  if (csvFile.exists()) {
+    if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      throw OpenFailure(csvFile.errorString().toStdString().c_str());
+    }
+    QTextStream inCsvFile(&csvFile);
+    inCsvFile.setCodec("UTF-8");
+    while (inCsvFile.atEnd() == false)
+    {
+      csvOperations << inCsvFile.readLine()+"\n";
+    }
+    csvFile.close();
+  }
+
   if (!csvFile.open(QIODevice::Append | QIODevice::Text)) {
     throw OpenFailure(csvFile.errorString().toStdString().c_str());
   }
@@ -306,6 +321,10 @@ QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
   inCsvFile.setCodec("UTF-8");
 
   for (auto const newLine: newLines) {
+    if (csvOperations.contains(newLine))
+    {
+      continue;
+    }
     inCsvFile << newLine;
   }
 
