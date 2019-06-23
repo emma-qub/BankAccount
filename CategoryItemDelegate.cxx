@@ -14,11 +14,11 @@ QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptio
   if (p_index.isValid() && p_index.column() == CSVModel::eCategory) {
     auto editor = new QComboBox(p_parent);
     auto group = p_index.sibling(p_index.row(), CSVModel::eGroup).data().toString();
-    editor->addItems(Utils::getCategoriesByGroup(group));
+    editor->addItems(Utils::GetCategoriesByGroup(group));
     return editor;
   } else if (p_index.isValid() && p_index.column() == CSVModel::eGroup) {
     auto editor = new QComboBox(p_parent);
-    editor->addItems(Utils::getGroups());
+    editor->addItems(Utils::GetGroups());
     return editor;
   } else {
     return QStyledItemDelegate::createEditor(p_parent, p_option, p_index);

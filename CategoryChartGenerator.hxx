@@ -10,13 +10,13 @@ class CategoryChartGenerator: public QObject {
 public:
   CategoryChartGenerator(QString const& p_category, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent = nullptr);
 
-  QtCharts::QChartView* createChartView();
+  QtCharts::QChartView* CreateChartView();
 
-  inline void setCategory(QString const& p_category) {m_category = p_category;}
+  inline void SetCategory(QString const& p_category) {m_category = p_category;}
 
 protected:
-  float getCategoryAmount(QDate const p_date) const;
-  QString getCurrentCSVFileName(const QDate& p_date) const;
+  float GetCategoryAmount(QDate const p_date) const;
+  QString GetCurrentCSVFileName(const QDate& p_date) const;
 
 private:
   QString m_category;
@@ -24,4 +24,4 @@ private:
   QDate m_endDate;
 };
 
-#endif // CATEGORYCHARTGENERATOR_HXX
+#endif

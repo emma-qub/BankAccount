@@ -10,7 +10,7 @@ MonthlyBalanceGenerator::MonthlyBalanceGenerator(CSVModel* p_model, int p_year, 
   setParent(p_parent);
 }
 
-QStringList MonthlyBalanceGenerator::createCategories() const {
+QStringList MonthlyBalanceGenerator::CreateCategories() const {
   QStringList columnList;
 
   for (int k = 0; k < m_model->rowCount(); ++k) {
@@ -22,7 +22,7 @@ QStringList MonthlyBalanceGenerator::createCategories() const {
   return columnList;
 }
 
-float MonthlyBalanceGenerator::getBalance(QStringList const& p_selectedCategories) {
+float MonthlyBalanceGenerator::GetBalance(QStringList const& p_selectedCategories) {
   float balance = 0.f;
 
   if (p_selectedCategories.isEmpty())

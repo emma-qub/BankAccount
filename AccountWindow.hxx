@@ -2,12 +2,16 @@
 #define ACCOUNTWINDOW_HXX
 
 #include <QWidget>
-#include <QLabel>
-#include <QPushButton>
 #include <QMap>
 
 class CSVModel;
 class QTableView;
+class QStandardItemModel;
+class QTreeView;
+class QPushButton;
+class QLabel;
+class QStandardItem;
+class QSortFilterProxyModel;
 
 class AccountWindow: public QWidget {
   Q_OBJECT
@@ -15,30 +19,28 @@ class AccountWindow: public QWidget {
 public:
   explicit AccountWindow(QWidget* parent = nullptr);
 
-  inline CSVModel* getModel() const {return m_csvModel;}
-  inline int getYear() const {return m_year;}
-  inline int getMonth() const {return m_month;}
+  inline CSVModel* GetModel() const {return m_csvModel;}
+  inline int GetYear() const {return m_year;}
+  inline int GetMonth() const {return m_month;}
 
 protected:
-  QString getCurrentCSVFileName() const;
-
-  void updateSummary();
+  QString GetCurrentCSVFileName() const;
+  void UpdateSummary();
+  void AddSeparator();
 
 protected slots:
-  void goToPreviousYear();
-  void goToPreviousMonth();
-  void goToNextMonth();
-  void goToNextYear();
-  void updateMonth();
-  void updateYear();
-  void fillModel();
-  void saveCategory(int p_row, const QString& p_group, const QString& p_category);
-  void reloadFile();
+  void GoToPreviousYear();
+  void GoToPreviousMonth();
+  void GoToNextMonth();
+  void GoToNextYear();
+  void FillModel();
+  void SaveCategory(int p_row, const QString& p_group, const QString& p_category);
+  void ReloadFile();
 
 signals:
-  void monthChanged();
-  void yearChanged();
-  void updateModelRequested();
+  void MonthChanged();
+  void YearChanged();
+  void UpdateModelRequested();
 
 private:
   CSVModel* m_csvModel;
@@ -51,19 +53,39 @@ private:
   QPushButton* m_nextMonth;
   QPushButton* m_nextYear;
 
-  QLabel* m_salaryLabel;
-  QLabel* m_fixedChargesLabel;
-  QLabel* m_variableChargesLabel;
-  QLabel* m_foodLabel;
-  QLabel* m_savingLabel;
-  QLabel* m_profitLabel;
-  QLabel* m_balanceLabel;
+  QStandardItemModel* m_categoryModel;
+  QTreeView* m_categoryView;
+  QStandardItem* m_salaryItem;
+  QStandardItem* m_fixedChargesItem;
+  QStandardItem* m_variableChargesItem;
+  QStandardItem* m_foodItem;
+  QStandardItem* m_savingItem;
+  QStandardItem* m_profitItem;
+  QStandardItem* m_balanceItem;
+  QStandardItem* m_inItem;
+  QStandardItem* m_outItem;
 
   int m_month;
   int m_year;
 
   QStringList m_fixedChargesList;
-  QMap<QString, QLabel*> m_fixedChargesLabelsMap;
+  QMap<QString, QStandardItem*> m_fixedChargesLabelsMap;
+  QMap<QString, QStandardItem*> m_fixedChargesValuesMap;
+
+  QStringList m_variableChargesList;
+  QMap<QString, QStandardItem*> m_variableChargesLabelsMap;
+  QMap<QString, QStandardItem*> m_variableChargesValuesMap;
+
+  QStringList m_profitList;
+  QMap<QString, QStandardItem*> m_profitLabelsMap;
+  QMap<QString, QStandardItem*> m_profitValuesMap;
+
+  QStringList m_foodList;
+  QMap<QString, QStandardItem*> m_foodLabelsMap;
+  QMap<QString, QStandardItem*> m_foodValuesMap;
+
+  QSortFilterProxyModel* m_proxyModel;
+
 };
 
-#endif // ACCOUNTWINDOW_HXX
+#endif

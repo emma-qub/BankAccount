@@ -8,23 +8,27 @@
 #include "CSVModel.hxx"
 
 #include <QWidget>
-#include <QGridLayout>
-#include <QComboBox>
-#include <QtCharts/QChartView>
+
+class QGridLayout;
+class QComboBox;
+class QTabWidget;
+namespace QtCharts {
+class QChartView;
+}
 
 class ChartWindow: public QWidget {
   Q_OBJECT
 
 public:
   explicit ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_parent = nullptr);
-  inline int getYear() const {return m_year;}
-  inline int getMonth() const {return m_month;}
+  inline int GetYear() const {return m_year;}
+  inline int GetMonth() const {return m_month;}
 
-  void updateMonthlyChart(int p_year, int p_month);
-  void updateMonthlyBalance(int p_year, int p_month);
+  void UpdateMonthlyChart(int p_year, int p_month);
+  void UpdateMonthlyBalance(int p_year, int p_month);
 
 protected slots:
-  void updateCategoryChart(const QString& p_category);
+  void UpdateCategoryChart(const QString& p_category);
 
 private:
   CSVModel* m_model;
@@ -42,4 +46,4 @@ private:
   QTabWidget* m_tabWidget;
 };
 
-#endif // CHARTWIDGET_HXX
+#endif

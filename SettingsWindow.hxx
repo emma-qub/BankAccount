@@ -10,4 +10,4 @@ public:
   explicit SettingsWindow(QWidget* p_parent = nullptr);
 };
 
-#endif // SETTINGSWINDOW_HXX
+#endif

@@ -19,7 +19,7 @@ MonthlyChartGenerator::MonthlyChartGenerator(CSVModel* p_model, int p_year, int 
   setParent(p_object);
 }
 
-QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
+QtCharts::QChartView* MonthlyChartGenerator::CreateChartView() {
   QVector<QBarSet*> barSetsVector;
   QStringList categoriesList;
   auto series = new QBarSeries;
@@ -43,7 +43,7 @@ QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
     barSetsVector.value(categoryIndex)->replace(0, newAmount);
   }
 
-  qSort(barSetsVector.begin(), barSetsVector.end(), lessThan);
+  qSort(barSetsVector.begin(), barSetsVector.end(), LessThan);
   for (auto barSet: barSetsVector)
     series->append(barSet);
 
@@ -61,6 +61,6 @@ QtCharts::QChartView* MonthlyChartGenerator::createChartView() {
   return chartView;
 }
 
-bool lessThan(QBarSet const* p_barSet1, QBarSet const* p_barSet2) {
+bool LessThan(QBarSet const* p_barSet1, QBarSet const* p_barSet2) {
   return p_barSet1->at(0) < p_barSet2->at(0);
 }

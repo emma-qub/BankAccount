@@ -25,4 +25,4 @@ private:
   QAction* m_updateOperationsAction;
 };
 
-#endif // MAINWINDOW_HXX
+#endif

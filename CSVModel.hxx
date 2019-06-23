@@ -82,7 +82,7 @@ public:
     ++m_rowCount;
   }
 
-  void appendEmptyLine() {
+  void AppendEmptyLine() {
     QStringList emptyLine;
     for (int k = 0; k < m_columnCount; ++k)
       emptyLine << "";
@@ -121,19 +121,19 @@ public:
   bool setData(QModelIndex const& p_index, QVariant const& p_value, int p_role = Qt::EditRole) override;
   Qt::ItemFlags flags(QModelIndex const& p_index) const override;
 
-  bool setSource(QString const& p_fileName, bool p_withHeader = false, QChar const& p_delim = ';');
+  bool SetSource(QString const& p_fileName, bool p_withHeader = false, QChar const& p_delim = ';');
 
-  float getCredit(int p_row);
-  float getDebit(int p_row);
+  float GetCredit(int p_row);
+  float GetDebit(int p_row);
 
 signals:
-  void saveCategoryRequested(int, QString const&, QString const&);
+  void SaveCategoryRequested(int, QString const&, QString const&);
 
 protected:
-  float getAmount(int p_row, ColumnName p_column);
+  float GetAmount(int p_row, ColumnName p_column);
 
 private:
   TableData<QString> m_data;
 };
 
-#endif // CSVMODEL_HXX
+#endif

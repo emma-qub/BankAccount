@@ -1,5 +1,7 @@
 #include "CSVModel.hxx"
 
+#include "Utils.hxx"
+
 #include <QFile>
 #include <QTextStream>
 #include <QColor>
@@ -19,9 +21,9 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
       return m_data.at(p_index.row(), column);
     } else if (p_role == Qt::ForegroundRole) {
       if (column == eCredit) {
-        return QColor("#80c342");
+        return Utils::GetGreenColor();
       } else if ((column == eCategory || column == eGroup) && p_index.data() == "Unknown") {
-        return QColor("#f58000");
+        return Utils::GetOrangeColor();
       }
     } else if (p_role == Qt::FontRole &&
       (column == eDebit|| column == eCredit || ((column == eCategory || column == eGroup) && p_index.data() == "Unknown"))) {
@@ -96,7 +98,7 @@ bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int 
     }
     auto result = m_data.setValue(p_index.row(), p_index.column(), p_value.toString());
     if (result) {
-      emit saveCategoryRequested(p_index.row(), group, category);
+      emit SaveCategoryRequested(p_index.row(), group, category);
     }
     return result;
   }
@@ -112,14 +114,14 @@ Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
   return flags;
 }
 
-bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QChar& p_delim) {
+bool CSVModel::SetSource(const QString& p_fileName, bool p_withHeader, const QChar& p_delim) {
   beginResetModel();
   m_data.clear();
 
   QFile file(p_fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
     // Create empty line, in order to prevent view from being reset
-    m_data.appendEmptyLine();
+    m_data.AppendEmptyLine();
     endResetModel();
     return false;
   }
@@ -145,14 +147,14 @@ bool CSVModel::setSource(const QString& p_fileName, bool p_withHeader, const QCh
   return true;
 }
 
-float CSVModel::getCredit(int p_row) {
-  return getAmount(p_row, eCredit);
+float CSVModel::GetCredit(int p_row) {
+  return GetAmount(p_row, eCredit);
 }
 
-float CSVModel::getDebit(int p_row) {
-  return getAmount(p_row, eDebit);
+float CSVModel::GetDebit(int p_row) {
+  return GetAmount(p_row, eDebit);
 }
 
-float CSVModel::getAmount(int p_row, ColumnName p_column) {
+float CSVModel::GetAmount(int p_row, ColumnName p_column) {
   return m_data[p_row][p_column].remove("€").toFloat();
 }
