@@ -37,9 +37,9 @@ QtCharts::QChartView* MonthlyChartGenerator::CreateChartView() {
 
     auto newAmount = barSetsVector.at(categoryIndex)->at(0);
     auto debitStr = m_model->index(k, CSVModel::eDebit).data().toString();
-    newAmount -= debitStr.remove(debitStr.length()-1, 1).toFloat();
+    newAmount -= debitStr.remove(debitStr.length()-1, 1).toDouble();
     auto creditStr = m_model->index(k, CSVModel::eCredit).data().toString();
-    newAmount -= creditStr.remove(creditStr.length()-1, 1).toFloat();
+    newAmount -= creditStr.remove(creditStr.length()-1, 1).toDouble();
     barSetsVector.value(categoryIndex)->replace(0, newAmount);
   }
 

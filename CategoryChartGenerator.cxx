@@ -55,9 +55,9 @@ QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
   return chartView;
 }
 
-float CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
+double CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
   auto fileName = GetCurrentCSVFileName(p_date);
-  float amount = 0.f;
+  double amount = 0;
 
   QFile file(fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -76,9 +76,9 @@ float CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
     if (tokensList.at(CSVModel::eCategory) == m_category)
     {
       auto debitStr = tokensList.at(CSVModel::eDebit);
-      amount -= debitStr.remove(debitStr.length()-1, 1).toFloat();
+      amount -= debitStr.remove(debitStr.length()-1, 1).toDouble();
       auto creditStr = tokensList.at(CSVModel::eCredit);
-      amount -= creditStr.remove(debitStr.length()-1, 1).toFloat();
+      amount -= creditStr.remove(debitStr.length()-1, 1).toDouble();
     }
   }
   file.close();

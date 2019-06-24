@@ -123,14 +123,14 @@ public:
 
   bool SetSource(QString const& p_fileName, bool p_withHeader = false, QChar const& p_delim = ';');
 
-  float GetCredit(int p_row);
-  float GetDebit(int p_row);
+  double GetCredit(int p_row);
+  double GetDebit(int p_row);
 
 signals:
   void SaveCategoryRequested(int, QString const&, QString const&);
 
 protected:
-  float GetAmount(int p_row, ColumnName p_column);
+  double GetAmount(int p_row, ColumnName p_column);
 
 private:
   TableData<QString> m_data;

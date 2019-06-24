@@ -17,6 +17,20 @@ class AccountWindow: public QWidget {
   Q_OBJECT
 
 public:
+  enum ItemRoles {
+    eIsItemSeparatorRole = Qt::UserRole+1,
+    eCategoryRole
+  };
+
+  enum CategoryType {
+    eSalary,
+    eFixedCharges,
+    eVariableCharges,
+    eFood,
+    eProfit,
+    eSaving
+  };
+
   explicit AccountWindow(QWidget* parent = nullptr);
 
   inline CSVModel* GetModel() const {return m_csvModel;}
@@ -87,5 +101,7 @@ private:
   QSortFilterProxyModel* m_proxyModel;
 
 };
+
+Q_DECLARE_METATYPE(AccountWindow::CategoryType)
 
 #endif

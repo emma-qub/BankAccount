@@ -16,7 +16,7 @@ public:
 
   QStringList CreateCategories() const;
 
-  float GetBalance(const QStringList& p_selectedCategories);
+  double GetBalance(const QStringList& p_selectedCategories);
 
 private:
   CSVModel* m_model;

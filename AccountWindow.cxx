@@ -31,26 +31,12 @@ AccountWindow::AccountWindow(QWidget* parent):
   connect(reloadAction, &QAction::triggered, this, &AccountWindow::ReloadFile);
   addAction(reloadAction);
 
-  // Toggle expand
-  auto toggleExpandAction = new QAction("Toggle expand", this);
-  toggleExpandAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_E));
-  toggleExpandAction->setCheckable(true);
-  connect(toggleExpandAction, &QAction::toggled, this, [this](bool p_toggle){
-    p_toggle ?
-    m_categoryView->expandAll():
-    m_categoryView->expandToDepth(0);
-  });
-  addAction(toggleExpandAction);
-
   // Toggle action
   auto toggleAction = new QAction("Toggle nul values", this);
   toggleAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_T));
   toggleAction->setCheckable(true);
-  connect(toggleAction, &QAction::toggled, this, [this, toggleExpandAction](bool p_toggle){
+  connect(toggleAction, &QAction::toggled, this, [this](bool p_toggle){
     p_toggle ?
-      m_proxyModel->setFilterRegularExpression(QRegularExpression("^$|^-?[1-9].*$")):
-      m_proxyModel->setFilterRegularExpression(QRegularExpression(".*"));
-    toggleExpandAction->isChecked() ?
       m_categoryView->expandAll():
       m_categoryView->expandToDepth(0);
   });
@@ -136,18 +122,25 @@ AccountWindow::AccountWindow(QWidget* parent):
   // In
   auto inItem = new QStandardItem("In");
   inItem->setBackground(Utils::GetFadedGreenColor());
+  auto inItemFont = inItem->font();
+  inItemFont.setBold(true);
+  inItem->setFont(inItemFont);
   m_inItem = new QStandardItem(QString::number(0, 'f', 2));
   m_inItem->setBackground(Utils::GetFadedGreenColor());
   m_inItem->setTextAlignment(Qt::AlignRight);
+  m_inItem->setFont(inItemFont);
   // Salary
   m_salaryItem = new QStandardItem(QString::number(0, 'f', 2));
   m_salaryItem->setTextAlignment(Qt::AlignRight);
-  inItem->appendRow({new QStandardItem("Salary"), m_salaryItem});
+  auto salaryLabelItem = new QStandardItem("Salary");
+  salaryLabelItem->setData(QVariant::fromValue<CategoryType>(eSalary), eCategoryRole);
+  inItem->appendRow({salaryLabelItem, m_salaryItem});
   // Profit
   m_profitItem = new QStandardItem(QString::number(0, 'f', 2));
   m_profitItem->setTextAlignment(Qt::AlignRight);
   auto profitLabelItem = new QStandardItem("Gain");
-  m_profitList = Utils::NOURRITURE;
+  profitLabelItem->setData(QVariant::fromValue<CategoryType>(eProfit), eCategoryRole);
+  m_profitList = Utils::GAIN;
   for (auto const& profit: m_profitList) {
     auto currentProfitItem = new QStandardItem(profit);
     auto currentProfitValueItem = new QStandardItem(QString::number(0, 'f', 2));
@@ -161,16 +154,22 @@ AccountWindow::AccountWindow(QWidget* parent):
   // Out
   auto outItem = new QStandardItem("Out");
   outItem->setBackground(Utils::GetFadedRedColor());
+  auto outItemFont = outItem->font();
+  outItemFont.setBold(true);
+  outItem->setFont(outItemFont);
   m_outItem = new QStandardItem(QString::number(0, 'f', 2));
   m_outItem->setBackground(Utils::GetFadedRedColor());
   m_outItem->setTextAlignment(Qt::AlignRight);
+  m_outItem->setFont(outItemFont);
   // Fixed charges
   m_fixedChargesItem = new QStandardItem(QString::number(0, 'f', 2));
   m_fixedChargesItem->setTextAlignment(Qt::AlignRight);
   auto fixedChargesLabelItem = new QStandardItem("Charges fixes");
+  fixedChargesLabelItem->setData(QVariant::fromValue<CategoryType>(eFixedCharges), eCategoryRole);
   m_fixedChargesList = Utils::CHARGES_FIXES;
   for (auto const& fixedCharge: m_fixedChargesList) {
     auto currentFixedChargeItem = new QStandardItem(fixedCharge);
+    currentFixedChargeItem->setForeground(QBrush(Utils::GetOrangeColor()));
     auto currentFixedChargeValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentFixedChargeValueItem->setTextAlignment(Qt::AlignRight);
     fixedChargesLabelItem->appendRow({currentFixedChargeItem, currentFixedChargeValueItem});
@@ -182,20 +181,13 @@ AccountWindow::AccountWindow(QWidget* parent):
   m_variableChargesItem = new QStandardItem(QString::number(0, 'f', 2));
   m_variableChargesItem->setTextAlignment(Qt::AlignRight);
   auto variableChargesLabelItem = new QStandardItem("Charges variables");
-  m_variableChargesList = Utils::CHARGES_VARIABLES;
-  for (auto const& variableCharge: m_variableChargesList) {
-    auto currentVariableChargeItem = new QStandardItem(variableCharge);
-    auto currentVariableChargeValueItem = new QStandardItem(QString::number(0, 'f', 2));
-    currentVariableChargeValueItem->setTextAlignment(Qt::AlignRight);
-    variableChargesLabelItem->appendRow({currentVariableChargeItem, currentVariableChargeValueItem});
-    m_variableChargesLabelsMap[variableCharge] = currentVariableChargeItem;
-    m_variableChargesValuesMap[variableCharge] = currentVariableChargeValueItem;
-  }
+  variableChargesLabelItem->setData(QVariant::fromValue<CategoryType>(eVariableCharges), eCategoryRole);
   outItem->appendRow({variableChargesLabelItem, m_variableChargesItem});
   // Food
   m_foodItem = new QStandardItem(QString::number(0, 'f', 2));
   m_foodItem->setTextAlignment(Qt::AlignRight);
   auto foodLabelItem = new QStandardItem("Nourriture");
+  foodLabelItem->setData(QVariant::fromValue<CategoryType>(eFood), eCategoryRole);
   m_foodList = Utils::NOURRITURE;
   for (auto const& food: m_foodList) {
     auto currentFoodItem = new QStandardItem(food);
@@ -209,11 +201,16 @@ AccountWindow::AccountWindow(QWidget* parent):
   // Saving
   m_savingItem = new QStandardItem(QString::number(0, 'f', 2));
   m_savingItem->setTextAlignment(Qt::AlignRight);
-  outItem->appendRow({new QStandardItem("Épargne"), m_savingItem});
+  auto savingLabelItem = new QStandardItem("Épargne");
+  savingLabelItem->setData(QVariant::fromValue<CategoryType>(eSaving), eCategoryRole);
+  outItem->appendRow({savingLabelItem, m_savingItem});
 
   // Balance
   m_balanceItem = new QStandardItem(QString::number(0, 'f', 2));
   m_balanceItem->setTextAlignment(Qt::AlignRight);
+  auto balanceItemFont = m_balanceItem->font();
+  balanceItemFont.setBold(true);
+  m_balanceItem->setFont(balanceItemFont);
 
   // Model
   m_categoryModel->appendRow({inItem, m_inItem});
@@ -222,7 +219,9 @@ AccountWindow::AccountWindow(QWidget* parent):
   auto separator2 = new QStandardItem("");
   separator2->setSelectable(false);
   AddSeparator();
-  m_categoryModel->appendRow({new QStandardItem("Équilibre"), m_balanceItem});
+  auto balanceItem = new QStandardItem("Équilibre");
+  balanceItem->setFont(balanceItemFont);
+  m_categoryModel->appendRow({balanceItem, m_balanceItem});
 
   // Summary layout
   auto summaryAndDateLayout = new QVBoxLayout;
@@ -249,6 +248,9 @@ AccountWindow::AccountWindow(QWidget* parent):
 
   // Fill model
   FillModel();
+
+  // Expand view
+  m_categoryView->expandToDepth(0);
 }
 
 QString AccountWindow::GetCurrentCSVFileName() const {
@@ -307,27 +309,69 @@ void AccountWindow::SaveCategory(int p_row, const QString& p_group, QString cons
 }
 
 void AccountWindow::UpdateSummary() {
-  float salary = 0;
-  float fixedCharges = 0;
-  float variableCharges = 0;
-  float food = 0;
-  float saving = 0;
-  float profit = 0;
-  float balance = 0;
-  float in = 0;
-  float out = 0;
+  double salary = 0;
+  double fixedCharges = 0;
+  double variableCharges = 0;
+  double food = 0;
+  double saving = 0;
+  double profit = 0;
+  double balance = 0;
+  double in = 0;
+  double out = 0;
 
+  // Clean fixed charges state
   for (auto const& fixedCharge: m_fixedChargesList) {
-    auto currentLabel = m_fixedChargesLabelsMap[fixedCharge];
-    m_fixedChargesValuesMap[fixedCharge]->setText(QString::number(0, 'f', 2));
-    QFont validateFont(currentLabel->font());
+    auto fixedChargeLabelItem = m_fixedChargesLabelsMap[fixedCharge];
+    QFont validateFont(fixedChargeLabelItem->font());
     validateFont.setBold(false);
-    currentLabel->setFont(validateFont);
+    fixedChargeLabelItem->setFont(validateFont);
   }
 
+  // Clean values
+  QModelIndex variableChargesIndex;
+  for (int outterRow = 0; outterRow < m_categoryModel->rowCount(); ++outterRow) {
+    auto outerItem = m_categoryModel->item(outterRow, 1);
+    if (outerItem->data(eIsItemSeparatorRole).toBool()) {
+      continue;
+    }
+    outerItem->setText(QString::number(0, 'f', 2));
+    auto outterCurrentIndex = m_categoryModel->index(outterRow, 0);
+    for (int row = 0; row < m_categoryModel->rowCount(outterCurrentIndex); ++row) {
+      m_categoryModel->itemFromIndex(outterCurrentIndex.child(row, 1))->setText(QString::number(0, 'f', 2));
+      auto currentIndex = m_categoryModel->index(row, 0, outterCurrentIndex);
+      if (currentIndex.data(eCategoryRole).value<CategoryType>() == eVariableCharges) {
+        variableChargesIndex = currentIndex;
+        continue;
+      }
+      for (int innerRow = 0; innerRow < m_categoryModel->rowCount(currentIndex); ++innerRow) {
+        auto innerLabelItem = m_categoryModel->itemFromIndex(currentIndex.child(innerRow, 0));
+        auto innerValueItem = m_categoryModel->itemFromIndex(currentIndex.child(innerRow, 1));
+        if (currentIndex.data(eCategoryRole).value<CategoryType>() == eFixedCharges) {
+          innerValueItem->setText(QString("-"));
+          innerLabelItem->setForeground(QBrush(Utils::GetOrangeColor()));
+        } else {
+          innerValueItem->setText(QString::number(0, 'f', 2));
+        }
+      }
+    }
+  }
+
+  // Clean Variable charges
+  Q_ASSERT_X(variableChargesIndex.isValid(), "AccountWindow::UpdateSummary()", "Could not find variableChargesIndex");
+  QList<QStandardItem*> variableChargesItemsList;
+  int rc = m_categoryModel->rowCount(variableChargesIndex);
+  auto variableChargesItem = m_categoryModel->itemFromIndex(variableChargesIndex);
+  for (int row = 0; row < rc; ++row) {
+    variableChargesItemsList << variableChargesItem->takeRow(0);
+  }
+  qDeleteAll(variableChargesItemsList);
+  m_variableChargesLabelsMap.clear();
+  m_variableChargesValuesMap.clear();
+
+  // Update amounts
   for (int row = 0; row < m_csvModel->rowCount(); ++row) {
     QString groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
-    float amount = m_csvModel->GetCredit(row) + m_csvModel->GetDebit(row);
+    auto amount = m_csvModel->GetCredit(row) + m_csvModel->GetDebit(row);
     Utils::Group group = Utils::GetGroupFromGroupName(groupName);
     QString categoryName = m_csvModel->index(row, CSVModel::eCategory).data().toString();
 
@@ -339,27 +383,44 @@ void AccountWindow::UpdateSummary() {
     case Utils::eFixedCharges: {
       Q_ASSERT_X(m_fixedChargesList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown fixed charge: %1").arg(categoryName).toStdString().c_str());
       auto currentItem = m_fixedChargesLabelsMap[categoryName];
-      QFont validateFont(currentItem->font());
-      validateFont.setBold(true);
-      currentItem->setFont(validateFont);
       auto currentValueItem = m_fixedChargesValuesMap[categoryName];
-      auto newAmount = amount + currentValueItem->text().toFloat();
+      currentItem->setForeground(currentValueItem->foreground());
+      bool ok = false;
+      auto oldAmount = currentValueItem->text().toDouble(&ok);
+      if (!ok) {
+        oldAmount = 0;
+      }
+      auto newAmount = amount + oldAmount;
       currentValueItem->setText(QString::number(newAmount, 'f', 2));
       fixedCharges += amount;
       break;
     }
     case Utils::eVariableCharges: {
-      Q_ASSERT_X(m_variableChargesList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown variable charge: %1").arg(categoryName).toStdString().c_str());
-      auto currentValueItem = m_variableChargesValuesMap[categoryName];
-      auto newAmount = amount + currentValueItem->text().toFloat();
+      QStandardItem* currentLabelItem = nullptr;
+      QStandardItem* currentValueItem = nullptr;
+      if (m_variableChargesLabelsMap.contains(categoryName)) {
+        currentLabelItem = m_variableChargesLabelsMap[categoryName];
+        currentValueItem = m_variableChargesValuesMap[categoryName];
+      } else {
+        currentLabelItem = new QStandardItem(categoryName);
+        currentValueItem = new QStandardItem(QString::number(0, 'f', 2));
+        currentValueItem->setTextAlignment(Qt::AlignRight);
+        variableChargesItem->appendRow({currentLabelItem, currentValueItem});
+        m_variableChargesLabelsMap[categoryName] = currentLabelItem;
+        m_variableChargesValuesMap[categoryName] = currentValueItem;
+      }
+      auto oldAmount = currentValueItem->text().toDouble();
+      auto newAmount = amount + oldAmount;
+
       currentValueItem->setText(QString::number(newAmount, 'f', 2));
       variableCharges += amount;
       break;
     }
     case Utils::eFood: {
-      Q_ASSERT_X(m_foodList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown variable charge: %1").arg(categoryName).toStdString().c_str());
+      Q_ASSERT_X(m_foodList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown food: %1").arg(categoryName).toStdString().c_str());
       auto currentValueItem = m_foodValuesMap[categoryName];
-      auto newAmount = amount + currentValueItem->text().toFloat();
+      auto oldAmount = currentValueItem->text().toDouble();
+      auto newAmount = amount + oldAmount;
       currentValueItem->setText(QString::number(newAmount, 'f', 2));
       food += amount;
       break;
@@ -369,9 +430,10 @@ void AccountWindow::UpdateSummary() {
       break;
     }
     case Utils::eProfit: {
-      Q_ASSERT_X(m_profitList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown variable charge: %1").arg(categoryName).toStdString().c_str());
+      Q_ASSERT_X(m_profitList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown profit: %1").arg(categoryName).toStdString().c_str());
       auto currentValueItem = m_profitValuesMap[categoryName];
-      auto newAmount = amount + currentValueItem->text().toFloat();
+      auto oldAmount = currentValueItem->text().toDouble();
+      auto newAmount = amount + oldAmount;
       currentValueItem->setText(QString::number(newAmount, 'f', 2));
       profit += amount;
       break;
@@ -383,6 +445,7 @@ void AccountWindow::UpdateSummary() {
     }
   }
 
+  // Compute in, out and balance
   in = salary + profit;
   out = fixedCharges + variableCharges + food + saving;
   balance = in + out;
@@ -402,7 +465,7 @@ void AccountWindow::UpdateSummary() {
   balance < 0 ? color = Utils::GetRedColor() : color = Utils::GetGreenColor();
   m_balanceItem->setForeground(QBrush(color));
 
-  m_categoryView->expandToDepth(0);
+  ///m_categoryView->expandToDepth(0);
 }
 
 void AccountWindow::ReloadFile() {
@@ -428,7 +491,9 @@ void AccountWindow::AddSeparator()
 {
   auto separator0 = new QStandardItem("");
   separator0->setFlags(Qt::NoItemFlags);
+  separator0->setData(true, eIsItemSeparatorRole);
   auto separator1 = new QStandardItem("");
   separator1->setFlags(Qt::NoItemFlags);
+  separator1->setData(true, eIsItemSeparatorRole);
   m_categoryModel->appendRow({separator0, separator1});
 }

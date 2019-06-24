@@ -22,8 +22,8 @@ QStringList MonthlyBalanceGenerator::CreateCategories() const {
   return columnList;
 }
 
-float MonthlyBalanceGenerator::GetBalance(QStringList const& p_selectedCategories) {
-  float balance = 0.f;
+double MonthlyBalanceGenerator::GetBalance(QStringList const& p_selectedCategories) {
+  double balance = 0;
 
   if (p_selectedCategories.isEmpty())
     return balance;
@@ -31,9 +31,9 @@ float MonthlyBalanceGenerator::GetBalance(QStringList const& p_selectedCategorie
   for (int k = 0; k < m_model->rowCount(); ++k) {
     if (p_selectedCategories.contains(m_model->index(k, CSVModel::eCategory).data().toString())) {
       auto debitStr = m_model->index(k, CSVModel::eDebit).data().toString();
-      balance -= debitStr.remove(debitStr.length()-1, 1).toFloat();
+      balance -= debitStr.remove(debitStr.length()-1, 1).toDouble();
       auto creditStr = m_model->index(k, CSVModel::eCredit).data().toString();
-      balance -= creditStr.remove(creditStr.length()-1, 1).toFloat();
+      balance -= creditStr.remove(creditStr.length()-1, 1).toDouble();
     }
   }
 

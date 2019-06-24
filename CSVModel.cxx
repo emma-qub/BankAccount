@@ -107,9 +107,8 @@ bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int 
 
 Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(p_index);
-  if (p_index.column() == eCategory || p_index.column() == eGroup)
-    flags |= Qt::ItemIsEditable;
-  else
+  (p_index.column() == eCategory || p_index.column() == eGroup) ?
+    flags |= Qt::ItemIsEditable:
     flags &= ~Qt::ItemIsEditable;
   return flags;
 }
@@ -147,14 +146,14 @@ bool CSVModel::SetSource(const QString& p_fileName, bool p_withHeader, const QCh
   return true;
 }
 
-float CSVModel::GetCredit(int p_row) {
+double CSVModel::GetCredit(int p_row) {
   return GetAmount(p_row, eCredit);
 }
 
-float CSVModel::GetDebit(int p_row) {
+double CSVModel::GetDebit(int p_row) {
   return GetAmount(p_row, eDebit);
 }
 
-float CSVModel::GetAmount(int p_row, ColumnName p_column) {
-  return m_data[p_row][p_column].remove("€").toFloat();
+double CSVModel::GetAmount(int p_row, ColumnName p_column) {
+  return m_data[p_row][p_column].remove("€").toDouble();
 }

@@ -15,7 +15,7 @@ public:
   inline void SetCategory(QString const& p_category) {m_category = p_category;}
 
 protected:
-  float GetCategoryAmount(QDate const p_date) const;
+  double GetCategoryAmount(QDate const p_date) const;
   QString GetCurrentCSVFileName(const QDate& p_date) const;
 
 private:
