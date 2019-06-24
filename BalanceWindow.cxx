@@ -1,9 +1,13 @@
 #include "BalanceWindow.hxx"
-#include "Utils.hxx"
 
 #include "CSVModel.hxx"
+#include "MonthlyBalanceGenerator.hxx"
+#include "Utils.hxx"
+
 
 #include <QCheckBox>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include <QDebug>
 
@@ -32,11 +36,11 @@ BalanceWindow::BalanceWindow(CSVModel* p_model, int p_year, int p_month, Monthly
   setLayout(mainLayout);
 }
 
-void BalanceWindow::updateBalance() {
-  m_balance->setText(QString::number(m_monthlyBalanceGenerator->getBalance(m_categoriesChecked)));
+void BalanceWindow::UpdateBalance() {
+  m_balance->setText(QString::number(m_monthlyBalanceGenerator->GetBalance(m_categoriesChecked)));
 }
 
-void BalanceWindow::refreshCategories() {
+void BalanceWindow::RefreshCategories() {
   QLayoutItem* layoutItem = nullptr;
   while ((layoutItem = m_categoriesLayout->takeAt(0)) != nullptr) {
     QCheckBox* oldCheckBox = dynamic_cast<QCheckBox*>(layoutItem->widget());
@@ -46,7 +50,7 @@ void BalanceWindow::refreshCategories() {
     }
   }
 
-  for (auto category: m_monthlyBalanceGenerator->createCategories()) {
+  for (auto category: m_monthlyBalanceGenerator->CreateCategories()) {
     auto checkBox = new QCheckBox(category);
     m_categoriesLayout->addWidget(checkBox);
     connect(checkBox, &QCheckBox::clicked, this, [this, checkBox]() {
@@ -55,7 +59,7 @@ void BalanceWindow::refreshCategories() {
       } else if (!checkBox->isChecked() && m_categoriesChecked.contains(checkBox->text())) {
         m_categoriesChecked.removeOne(checkBox->text());
       }
-      updateBalance();
+      UpdateBalance();
     });
   }
   m_categoriesLayout->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));

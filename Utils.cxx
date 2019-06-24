@@ -91,7 +91,7 @@ QMap<Utils::Group, QStringList> const Utils::CATEGORIES_BY_GROUP =
       {Utils::eProfit, Utils::GAIN},
       {Utils::eUnknown, QStringList() << "Unknown"}});
 
-QStringList const Utils::getCategories() {
+QStringList const Utils::GetCategories() {
   QStringList categories;
   for (auto categoriesPart: CATEGORIES_BY_GROUP.values()) {
     categories << categoriesPart;
@@ -100,14 +100,43 @@ QStringList const Utils::getCategories() {
   return categories;
 }
 
-QStringList const Utils::getGroups() {
+QStringList const Utils::GetGroups() {
   return GROUP_BY_NAME.keys();
 }
 
-QStringList const Utils::getCategoriesByGroup(QString const& p_group) {
+QStringList const Utils::GetCategoriesByGroup(QString const& p_group) {
   return CATEGORIES_BY_GROUP.value(GROUP_BY_NAME.value(p_group));
 }
 
-Utils::Group Utils::getGroupFromGroupName(QString const& p_groupName) {
+Utils::Group Utils::GetGroupFromGroupName(QString const& p_groupName) {
   return GROUP_BY_NAME.value(p_groupName);
+}
+
+QColor Utils::GetRedColor()
+{
+  return QColor("#dc3545");
+}
+
+QColor Utils::GetFadedRedColor()
+{
+  auto color = GetRedColor();
+  color.setAlpha(127);
+  return color;
+}
+
+QColor Utils::GetGreenColor()
+{
+  return QColor("#28a745");
+}
+
+QColor Utils::GetFadedGreenColor()
+{
+  auto color = GetGreenColor();
+  color.setAlpha(127);
+  return color;
+}
+
+QColor Utils::GetOrangeColor()
+{
+  return QColor("#fd7e14");
 }

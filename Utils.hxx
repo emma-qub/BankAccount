@@ -3,6 +3,7 @@
 
 #include <QStringList>
 #include <QMap>
+#include <QColor>
 
 class Utils
 {
@@ -27,11 +28,18 @@ public:
   static QMap<Group, QStringList> const CATEGORIES_BY_GROUP;
   static QMap<QString, Utils::Group> const GROUP_BY_NAME;
 
-  static QStringList const getCategories();
-  static QStringList const getGroups();
-  static QStringList const getCategoriesByGroup(const QString& p_group);
+  static QStringList const GetCategories();
+  static QStringList const GetGroups();
+  static QStringList const GetCategoriesByGroup(const QString& p_group);
 
-  static Group getGroupFromGroupName(QString const& p_groupName);
+  static Group GetGroupFromGroupName(QString const& p_groupName);
+
+  static QColor GetRedColor();
+  static QColor GetFadedRedColor();
+  static QColor GetGreenColor();
+  static QColor GetFadedGreenColor();
+  static QColor GetOrangeColor();
+
 };
 
-#endif // UTILS_HXX
+#endif

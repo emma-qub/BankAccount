@@ -17,7 +17,7 @@
 MonthlyCSVGenerator::MonthlyCSVGenerator() {
 }
 
-void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim,
+void MonthlyCSVGenerator::ConvertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim,
   const QString& p_outputFileName, const QString& p_rawFileName) {
 
   QString csvDirectoryPath = "../BankAccount/csv";
@@ -66,12 +66,12 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
     QString category("Unknown");
 
     // Handle operation type
-    auto operationType = getOperationType(tokens.at(2));
+    auto operationType = GetOperationType(tokens.at(2));
 
     // Handle label
     auto label = tokens.at(3);
     if (label.startsWith("DU ")) {
-      label.mid(10);
+      label = label.mid(10);
     }
 
     // Handle debit and credit
@@ -98,7 +98,7 @@ void MonthlyCSVGenerator::convertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
   rawCSV.close();
 }
 
-void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_group, const QString& p_category, const QString& p_inFileName) {
+void MonthlyCSVGenerator::SaveCategory(int p_row, const QString& p_group, const QString& p_category, const QString& p_inFileName) {
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(inFile.errorString().toStdString().c_str());
@@ -132,7 +132,7 @@ void MonthlyCSVGenerator::saveCategory(int p_row, const QString& p_group, const 
   outFile.close();
 }
 
-void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
+void MonthlyCSVGenerator::UpdateRawCSV(QDate const& p_date, QString const& p_inFileName, QChar const& p_delim, bool p_hasHeader) {
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = p_date.toString("MM-yyyy");
   QString accountDirectoryPath = csvDirectoryPath+QDir::separator()+accountDirectoryName;
@@ -210,7 +210,7 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
 
   // Convert operation from temp raw csv file to temp operation csv file
   auto operationTempName = QString("operationTemp.csv");
-  convertRawCSVToMonthlyCSV(p_date, p_delim, operationTempName, rawTempName);
+  ConvertRawCSVToMonthlyCSV(p_date, p_delim, operationTempName, rawTempName);
 
   // Add temp raw csv file content at the beginning of existing raw csv file
   if (!existingRawCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -258,10 +258,10 @@ void MonthlyCSVGenerator::updateRawCSV(QDate const& p_date, QString const& p_inF
   accountDirectory.remove(operationTempName);
 
   // Clean operations
-  cleanOperations(existingOperation.fileName());
+  CleanOperations(existingOperation.fileName());
 }
 
-QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
+QString MonthlyCSVGenerator::ConvertXLSToCSV(QString const& p_xlsFileName) {
   QFile xlsFile(p_xlsFileName);
   if (!xlsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(xlsFile.errorString().toStdString().c_str());
@@ -320,7 +320,7 @@ QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
   QTextStream inCsvFile(&csvFile);
   inCsvFile.setCodec("UTF-8");
 
-  for (auto const newLine: newLines) {
+  for (auto const& newLine: newLines) {
     if (csvOperations.contains(newLine))
     {
       continue;
@@ -333,7 +333,7 @@ QString MonthlyCSVGenerator::convertXLSToCSV(QString const& p_xlsFileName) {
   return csvFileName;
 }
 
-void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {
+void MonthlyCSVGenerator::CleanOperations(QString const& p_fileName) {
   QFile inFile(p_fileName);
   if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(inFile.errorString().toStdString().c_str());
@@ -368,7 +368,7 @@ void MonthlyCSVGenerator::cleanOperations(QString const& p_fileName) {
   outFile.close();
 }
 
-QString MonthlyCSVGenerator::getOperationType(QString const& p_operationType) {
+QString MonthlyCSVGenerator::GetOperationType(QString const& p_operationType) {
   QString operationType = p_operationType;
 
   if (p_operationType == "FACTURE CARTE") {

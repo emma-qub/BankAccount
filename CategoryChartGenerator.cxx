@@ -24,7 +24,7 @@ CategoryChartGenerator::CategoryChartGenerator(QString const& p_category, QDate 
   }
 }
 
-QtCharts::QChartView* CategoryChartGenerator::createChartView() {
+QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
   if (m_beginDate > m_endDate) {
     qt_assert_x("QtCharts::QChartView* CategoryChartGenerator::createChartView() const",
       "End date is superior to begin date", "CategoryChartGenerator", 25);
@@ -36,7 +36,7 @@ QtCharts::QChartView* CategoryChartGenerator::createChartView() {
   while (currDate <= m_endDate)
   {
     auto barSet = new QBarSet(currDate.toString("MMMM yyyy"), this);
-    *barSet << getCategoryAmount(currDate);
+    *barSet << GetCategoryAmount(currDate);
     series->append(barSet);
     currDate = currDate.addMonths(1);
   }
@@ -55,8 +55,8 @@ QtCharts::QChartView* CategoryChartGenerator::createChartView() {
   return chartView;
 }
 
-float CategoryChartGenerator::getCategoryAmount(const QDate p_date) const {
-  auto fileName = getCurrentCSVFileName(p_date);
+float CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
+  auto fileName = GetCurrentCSVFileName(p_date);
   float amount = 0.f;
 
   QFile file(fileName);
@@ -86,6 +86,6 @@ float CategoryChartGenerator::getCategoryAmount(const QDate p_date) const {
   return amount;
 }
 
-QString CategoryChartGenerator::getCurrentCSVFileName(QDate const& p_date) const {
+QString CategoryChartGenerator::GetCurrentCSVFileName(QDate const& p_date) const {
   return QString("../BankAccount/csv/"+p_date.toString("MM-yyyy")+"/operations.csv");
 }

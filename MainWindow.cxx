@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent):
   QMainWindow(parent) {
 
   m_accountWindow = new AccountWindow;
-  m_chartWindow = new ChartWindow(m_accountWindow->getModel(), m_accountWindow->getYear(), m_accountWindow->getMonth());
+  m_chartWindow = new ChartWindow(m_accountWindow->GetModel(), m_accountWindow->GetYear(), m_accountWindow->GetMonth());
   m_settingsWindow = new SettingsWindow;
 
   m_tabWidget = new QTabWidget;
@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget* parent):
 
   connect(m_tabWidget, &QTabWidget::currentChanged, this, [this](int p_tab) {
     if (p_tab == 1) {
-      m_chartWindow->updateMonthlyChart(m_accountWindow->getYear(), m_accountWindow->getMonth());
-      m_chartWindow->updateMonthlyBalance(m_accountWindow->getYear(), m_accountWindow->getMonth());
+      m_chartWindow->UpdateMonthlyChart(m_accountWindow->GetYear(), m_accountWindow->GetMonth());
+      m_chartWindow->UpdateMonthlyBalance(m_accountWindow->GetYear(), m_accountWindow->GetMonth());
     }
   });
 

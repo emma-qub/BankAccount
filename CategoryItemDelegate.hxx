@@ -12,4 +12,4 @@ public:
   void setModelData(QWidget* p_editor, QAbstractItemModel* p_model, const QModelIndex& p_index) const override;
 };
 
-#endif // CATEGORYITEMDELEGATE_HXX
+#endif

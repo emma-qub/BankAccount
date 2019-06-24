@@ -2,29 +2,25 @@
 #define BALANCEWINDOW_HXX
 
 #include <QWidget>
-#include <QLabel>
-#include <QVBoxLayout>
-
-#include "MonthlyBalanceGenerator.hxx"
 
 class CSVModel;
+class MonthlyBalanceGenerator;
+
+class QLabel;
+class QVBoxLayout;
 
 class BalanceWindow: public QWidget {
   Q_OBJECT
 
 public:
   explicit BalanceWindow(CSVModel* p_model, int p_year, int p_month, MonthlyBalanceGenerator* p_monthlyBalanceGenerator, QWidget* p_parent = nullptr);
-  inline int getYear() const {return m_year;}
-  inline int getMonth() const {return m_month;}
+  inline int GetYear() const {return m_year;}
+  inline int GetMonth() const {return m_month;}
 
-  void refreshCategories();
-
-signals:
-
-public slots:
+  void RefreshCategories();
 
 protected:
-  void updateBalance();
+  void UpdateBalance();
 
 private:
   CSVModel* m_model;
@@ -36,4 +32,4 @@ private:
   QVBoxLayout* m_categoriesLayout;
 };
 
-#endif // BALANCEWINDOW_HXX
+#endif
