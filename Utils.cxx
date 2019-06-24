@@ -30,7 +30,8 @@ QStringList const Utils::CHARGES_FIXES =
     << "Garage"
     << "Impôts"
     << "Loyer"
-    << "Patreon";
+    << "Patreon"
+    << "TCL";
 
 QStringList const Utils::NOURRITURE =
   QStringList()
