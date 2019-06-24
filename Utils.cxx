@@ -5,8 +5,9 @@ Utils::Utils() {
 
 QStringList const Utils::GAIN =
   QStringList()
-    << "Famille"
     << "Amis"
+    << "CE"
+    << "Famille"
     << "Ventes";
 
 QStringList const Utils::EPARGNE =
@@ -21,10 +22,12 @@ QStringList const Utils::CHARGES_FIXES =
     << "Assurance"
     << "Banque"
     << "Charges"
+    << "Cotisations Elsa"
     << "Deezer"
     << "EDF"
     << "Escalade"
     << "Free"
+    << "Garage"
     << "Impôts"
     << "Loyer"
     << "Patreon";
@@ -36,7 +39,9 @@ QStringList const Utils::NOURRITURE =
 
 QStringList const Utils::CHARGES_VARIABLES =
   QStringList()
+    << "Beauté"
     << "Cadeau donné"
+    << "Chat"
     << "Cinéma"
     << "Coiffeur"
     << "Déménagement"
@@ -60,6 +65,7 @@ QStringList const Utils::CHARGES_VARIABLES =
     << "Retrait"
     << "Salaire"
     << "SNCF"
+    << "Tatouage"
     << "Transports"
     << "Travaux"
     << "Vêtements"
