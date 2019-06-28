@@ -4,6 +4,7 @@
 #include "MonthlyCSVGenerator.hxx"
 #include "CategoryItemDelegate.hxx"
 #include "Utils.hxx"
+#include "BudgetItemDelegate.hxx"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -112,12 +113,11 @@ AccountWindow::AccountWindow(QWidget* parent):
   // Summary model view
   m_categoryView = new QTreeView;
   m_categoryModel = new QStandardItemModel;
-  m_proxyModel = new QSortFilterProxyModel;
-  m_proxyModel->setSourceModel(m_categoryModel);
-  m_proxyModel->setFilterKeyColumn(1);
-  m_categoryView->setModel(m_proxyModel);
+  m_categoryModel->setColumnCount(4);
+  m_categoryView->setModel(m_categoryModel);
   m_categoryView->setHeaderHidden(true);
-  m_categoryView->setEditTriggers(QTreeView::NoEditTriggers);
+  auto budgetItemDelegate = new BudgetItemDelegate(m_categoryView);
+  m_categoryView->setItemDelegate(budgetItemDelegate);
 
   // In
   auto inItem = new QStandardItem("In");
@@ -134,7 +134,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   m_salaryItem->setTextAlignment(Qt::AlignRight);
   auto salaryLabelItem = new QStandardItem("Salary");
   salaryLabelItem->setData(QVariant::fromValue<CategoryType>(eSalary), eCategoryRole);
-  inItem->appendRow({salaryLabelItem, m_salaryItem});
+  inItem->appendRow({salaryLabelItem, m_salaryItem, new QStandardItem, new QStandardItem});
   // Profit
   m_profitItem = new QStandardItem(QString::number(0, 'f', 2));
   m_profitItem->setTextAlignment(Qt::AlignRight);
@@ -145,11 +145,11 @@ AccountWindow::AccountWindow(QWidget* parent):
     auto currentProfitItem = new QStandardItem(profit);
     auto currentProfitValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentProfitValueItem->setTextAlignment(Qt::AlignRight);
-    profitLabelItem->appendRow({currentProfitItem, currentProfitValueItem});
+    profitLabelItem->appendRow({currentProfitItem, currentProfitValueItem, new QStandardItem, new QStandardItem});
     m_profitLabelsMap[profit] = currentProfitItem;
     m_profitValuesMap[profit] = currentProfitValueItem;
   }
-  inItem->appendRow({profitLabelItem, m_profitItem});
+  inItem->appendRow({profitLabelItem, m_profitItem, new QStandardItem, new QStandardItem});
 
   // Out
   auto outItem = new QStandardItem("Out");
@@ -172,17 +172,17 @@ AccountWindow::AccountWindow(QWidget* parent):
     currentFixedChargeItem->setForeground(QBrush(Utils::GetOrangeColor()));
     auto currentFixedChargeValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentFixedChargeValueItem->setTextAlignment(Qt::AlignRight);
-    fixedChargesLabelItem->appendRow({currentFixedChargeItem, currentFixedChargeValueItem});
+    fixedChargesLabelItem->appendRow({currentFixedChargeItem, currentFixedChargeValueItem, new QStandardItem, new QStandardItem});
     m_fixedChargesLabelsMap[fixedCharge] = currentFixedChargeItem;
     m_fixedChargesValuesMap[fixedCharge] = currentFixedChargeValueItem;
   }
-  outItem->appendRow({fixedChargesLabelItem, m_fixedChargesItem});
+  outItem->appendRow({fixedChargesLabelItem, m_fixedChargesItem, new QStandardItem, new QStandardItem});
   // Variable charges
   m_variableChargesItem = new QStandardItem(QString::number(0, 'f', 2));
   m_variableChargesItem->setTextAlignment(Qt::AlignRight);
   auto variableChargesLabelItem = new QStandardItem("Charges variables");
   variableChargesLabelItem->setData(QVariant::fromValue<CategoryType>(eVariableCharges), eCategoryRole);
-  outItem->appendRow({variableChargesLabelItem, m_variableChargesItem});
+  outItem->appendRow({variableChargesLabelItem, m_variableChargesItem, new QStandardItem, new QStandardItem});
   // Food
   m_foodItem = new QStandardItem(QString::number(0, 'f', 2));
   m_foodItem->setTextAlignment(Qt::AlignRight);
@@ -193,17 +193,23 @@ AccountWindow::AccountWindow(QWidget* parent):
     auto currentFoodItem = new QStandardItem(food);
     auto currentFoodValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentFoodValueItem->setTextAlignment(Qt::AlignRight);
-    foodLabelItem->appendRow({currentFoodItem, currentFoodValueItem});
+
+    foodLabelItem->appendRow({currentFoodItem, currentFoodValueItem, new QStandardItem, new QStandardItem});
     m_foodLabelsMap[food] = currentFoodItem;
     m_foodValuesMap[food] = currentFoodValueItem;
   }
-  outItem->appendRow({foodLabelItem, m_foodItem});
+  auto currentBudgetItem = new QStandardItem;
+  currentBudgetItem->setData(true, eCanHaveBudgetRole);
+  currentBudgetItem->setTextAlignment(Qt::AlignRight);
+  auto currentPercentageItem = new QStandardItem;
+  currentPercentageItem->setTextAlignment(Qt::AlignRight);
+  outItem->appendRow({foodLabelItem, m_foodItem, currentBudgetItem, currentPercentageItem});
   // Saving
   m_savingItem = new QStandardItem(QString::number(0, 'f', 2));
   m_savingItem->setTextAlignment(Qt::AlignRight);
   auto savingLabelItem = new QStandardItem("Épargne");
   savingLabelItem->setData(QVariant::fromValue<CategoryType>(eSaving), eCategoryRole);
-  outItem->appendRow({savingLabelItem, m_savingItem});
+  outItem->appendRow({savingLabelItem, m_savingItem, new QStandardItem, new QStandardItem});
 
   // Balance
   m_balanceItem = new QStandardItem(QString::number(0, 'f', 2));
@@ -213,15 +219,23 @@ AccountWindow::AccountWindow(QWidget* parent):
   m_balanceItem->setFont(balanceItemFont);
 
   // Model
-  m_categoryModel->appendRow({inItem, m_inItem});
+  auto inColumn2 = new QStandardItem;
+  inColumn2->setBackground(QBrush(Utils::GetFadedGreenColor()));
+  auto inColumn3 = new QStandardItem;
+  inColumn3->setBackground(QBrush(Utils::GetFadedGreenColor()));
+  m_categoryModel->appendRow({inItem, m_inItem, inColumn2, inColumn3});
   AddSeparator();
-  m_categoryModel->appendRow({outItem, m_outItem});
+  auto outColumn2 = new QStandardItem;
+  outColumn2->setBackground(QBrush(Utils::GetFadedRedColor()));
+  auto outColumn3 = new QStandardItem;
+  outColumn3->setBackground(QBrush(Utils::GetFadedRedColor()));
+  m_categoryModel->appendRow({outItem, m_outItem, outColumn2, outColumn3});
   auto separator2 = new QStandardItem("");
   separator2->setSelectable(false);
   AddSeparator();
   auto balanceItem = new QStandardItem("Équilibre");
   balanceItem->setFont(balanceItemFont);
-  m_categoryModel->appendRow({balanceItem, m_balanceItem});
+  m_categoryModel->appendRow({balanceItem, m_balanceItem, new QStandardItem, new QStandardItem});
 
   // Summary layout
   auto summaryAndDateLayout = new QVBoxLayout;
@@ -245,6 +259,8 @@ AccountWindow::AccountWindow(QWidget* parent):
   connect(this, &AccountWindow::MonthChanged, this, [this](){m_monthLabel->setText(QDate(1, m_month, 1).toString("MMMM"));});
   connect(this, &AccountWindow::UpdateModelRequested, this, &AccountWindow::FillModel);
   connect(m_categoryView, &QTreeView::expanded, this, [this](){m_categoryView->resizeColumnToContents(0);});
+  connect(budgetItemDelegate, &BudgetItemDelegate::BudgetUpdated, this, &AccountWindow::UpdatePercentage);
+  connect(budgetItemDelegate, &BudgetItemDelegate::BudgetUpdated, this, &AccountWindow::SaveBudget);
 
   // Fill model
   FillModel();
@@ -398,21 +414,35 @@ void AccountWindow::UpdateSummary() {
     case Utils::eVariableCharges: {
       QStandardItem* currentLabelItem = nullptr;
       QStandardItem* currentValueItem = nullptr;
+      auto currentBudgetItem = new QStandardItem;
+      currentBudgetItem->setData(true, eCanHaveBudgetRole);
+      currentBudgetItem->setTextAlignment(Qt::AlignRight);
+      QStandardItem* currentPercentageItem = nullptr;
       if (m_variableChargesLabelsMap.contains(categoryName)) {
         currentLabelItem = m_variableChargesLabelsMap[categoryName];
         currentValueItem = m_variableChargesValuesMap[categoryName];
+        auto currentLabelIndex = currentLabelItem->index();
+        currentPercentageItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(currentLabelIndex.row(), 3, currentLabelIndex));
       } else {
         currentLabelItem = new QStandardItem(categoryName);
         currentValueItem = new QStandardItem(QString::number(0, 'f', 2));
         currentValueItem->setTextAlignment(Qt::AlignRight);
-        variableChargesItem->appendRow({currentLabelItem, currentValueItem});
+        currentPercentageItem = new QStandardItem;
+        currentPercentageItem->setTextAlignment(Qt::AlignRight);
+        variableChargesItem->appendRow({currentLabelItem, currentValueItem, currentBudgetItem, currentPercentageItem});
         m_variableChargesLabelsMap[categoryName] = currentLabelItem;
         m_variableChargesValuesMap[categoryName] = currentValueItem;
       }
       auto oldAmount = currentValueItem->text().toDouble();
       auto newAmount = amount + oldAmount;
+      auto budget = currentBudgetItem->data(Qt::DisplayRole).toDouble();
 
       currentValueItem->setText(QString::number(newAmount, 'f', 2));
+      if (budget != 0.) {
+        auto percentage = QString::number(-newAmount/budget*100., 'f', 2)+"%";
+        currentPercentageItem->setText(percentage);
+      }
+
       variableCharges += amount;
       break;
     }
@@ -465,7 +495,8 @@ void AccountWindow::UpdateSummary() {
   balance < 0 ? color = Utils::GetRedColor() : color = Utils::GetGreenColor();
   m_balanceItem->setForeground(QBrush(color));
 
-  ///m_categoryView->expandToDepth(0);
+  m_categoryView->setColumnWidth(2, 50);
+  m_categoryView->setColumnWidth(3, 50);
 }
 
 void AccountWindow::ReloadFile() {
@@ -487,6 +518,76 @@ void AccountWindow::ReloadFile() {
   FillModel();
 }
 
+void AccountWindow::UpdatePercentage(const QModelIndex& p_index)
+{
+  auto row = p_index.row();
+
+  auto amount = m_categoryModel->sibling(row, 1, p_index).data().toDouble();
+  auto budget = m_categoryModel->sibling(row, 2, p_index).data().toDouble();
+
+  QVariant newPercentage;
+  if (budget != 0.) {
+    newPercentage = QString::number(-amount/budget*100., 'f', 2)+"%";
+  }
+
+  auto percentageItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(row, 3, p_index));
+  percentageItem->setData(newPercentage, Qt::DisplayRole);
+}
+
+void AccountWindow::SaveBudget(QModelIndex const& p_index) {
+  auto budgetItem = m_categoryModel->itemFromIndex(p_index);
+  auto labelItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(p_index.row(), 0, p_index));
+
+  QString csvDirectoryPath = "../BankAccount/csv";
+  QString accountDirectoryName = QDate(m_year, m_month, 1).toString("MM-yyyy");
+  QString accountDirectoryPath = csvDirectoryPath+QDir::separator()+accountDirectoryName;
+  QString inFilePath = accountDirectoryPath+QDir::separator()+"budget.csv";
+
+  QFile budgetCSV(inFilePath);
+
+  QTextStream in(&budgetCSV);
+  in.setCodec("UTF-8");
+
+  if (!budgetCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    budgetItem->setText("Error");
+    return;
+  }
+
+  bool found = false;
+  QString line;
+  QStringList budgetStringList;
+  while (!in.atEnd()) {
+    line = in.readLine();
+    if (line.isEmpty()) {
+      continue;
+    }
+    auto tokens = line.split(";");
+    if (tokens.at(0) == labelItem->text()) {
+      budgetStringList << tokens.at(0)+";"+p_index.data().toString();
+      found = true;
+    } else {
+      budgetStringList << tokens.join(";");
+    }
+  }
+  if (!found) {
+    budgetStringList << labelItem->text()+";"+p_index.data().toString();
+  }
+
+  budgetCSV.close();
+
+  QTextStream out(&budgetCSV);
+  out.setCodec("UTF-8");
+
+  if (!budgetCSV.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    budgetItem->setText("Error");
+    return;
+  }
+
+  for (auto const& newLine: budgetStringList) {
+    out << newLine << "\n";
+  }
+}
+
 void AccountWindow::AddSeparator()
 {
   auto separator0 = new QStandardItem("");
@@ -495,5 +596,5 @@ void AccountWindow::AddSeparator()
   auto separator1 = new QStandardItem("");
   separator1->setFlags(Qt::NoItemFlags);
   separator1->setData(true, eIsItemSeparatorRole);
-  m_categoryModel->appendRow({separator0, separator1});
+  m_categoryModel->appendRow({separator0, separator1, new QStandardItem, new QStandardItem});
 }

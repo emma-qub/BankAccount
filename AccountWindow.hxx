@@ -19,7 +19,8 @@ class AccountWindow: public QWidget {
 public:
   enum ItemRoles {
     eIsItemSeparatorRole = Qt::UserRole+1,
-    eCategoryRole
+    eCategoryRole,
+    eCanHaveBudgetRole
   };
 
   enum CategoryType {
@@ -50,6 +51,8 @@ protected slots:
   void FillModel();
   void SaveCategory(int p_row, const QString& p_group, const QString& p_category);
   void ReloadFile();
+  void UpdatePercentage(QModelIndex const& p_index);
+  void SaveBudget(QModelIndex const& p_index);
 
 signals:
   void MonthChanged();
@@ -97,8 +100,6 @@ private:
   QStringList m_foodList;
   QMap<QString, QStandardItem*> m_foodLabelsMap;
   QMap<QString, QStandardItem*> m_foodValuesMap;
-
-  QSortFilterProxyModel* m_proxyModel;
 
 };
 
