@@ -318,10 +318,50 @@ void AccountWindow::FillModel() {
   }
 
   UpdateSummary();
+  GetBudgetAmounts();
 }
 
 void AccountWindow::SaveCategory(int p_row, const QString& p_group, QString const& p_category) {
   MonthlyCSVGenerator::SaveCategory(p_row, p_group, p_category, GetCurrentCSVFileName());
+}
+
+void AccountWindow::GetBudgetAmounts() {
+  m_budgetMap.clear();
+
+  QString csvDirectoryPath = "../BankAccount/csv";
+  QString accountDirectoryName = QDate(m_year, m_month, 1).toString("MM-yyyy");
+  QFile budgetFile(csvDirectoryPath+QDir::separator()+accountDirectoryName+QDir::separator()+"budget.csv");
+
+  if (budgetFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QTextStream inBudgetFile(&budgetFile);
+    inBudgetFile.setCodec("UTF-8");
+
+    while (!inBudgetFile.atEnd()) {
+      auto line = inBudgetFile.readLine();
+      auto categoryBudgetPair = line.split(";");
+      m_budgetMap[categoryBudgetPair.at(0)] = categoryBudgetPair.at(1);
+    }
+    budgetFile.close();
+  }
+
+  UpdateBuget();
+}
+
+void AccountWindow::UpdateBuget(QModelIndex const& p_parentIndex) {
+  for (int row = 0; row < m_categoryModel->rowCount(p_parentIndex); ++row) {
+    auto currentLabelIndex = m_categoryModel->index(row, 0, p_parentIndex);
+    auto currentBudgetIndex = m_categoryModel->sibling(row, 2, currentLabelIndex);
+    if (currentBudgetIndex.data(eCanHaveBudgetRole).toBool()) {
+      auto currentLabel = currentLabelIndex.data().toString();
+      QString budget;
+      if (m_budgetMap.contains(currentLabel)) {
+        budget = m_budgetMap[currentLabel];
+      }
+      m_categoryModel->itemFromIndex(currentBudgetIndex)->setText(budget);
+      UpdatePercentage(currentBudgetIndex);
+    }
+    UpdateBuget(currentLabelIndex);
+  }
 }
 
 void AccountWindow::UpdateSummary() {
@@ -495,8 +535,8 @@ void AccountWindow::UpdateSummary() {
   balance < 0 ? color = Utils::GetRedColor() : color = Utils::GetGreenColor();
   m_balanceItem->setForeground(QBrush(color));
 
-  m_categoryView->setColumnWidth(2, 50);
-  m_categoryView->setColumnWidth(3, 50);
+  m_categoryView->setColumnWidth(2, 40);
+  m_categoryView->setColumnWidth(3, 60);
 }
 
 void AccountWindow::ReloadFile() {
@@ -548,7 +588,7 @@ void AccountWindow::SaveBudget(QModelIndex const& p_index) {
   QTextStream in(&budgetCSV);
   in.setCodec("UTF-8");
 
-  if (!budgetCSV.open(QIODevice::ReadOnly | QIODevice::Text)) {
+  if (!budgetCSV.open(QIODevice::ReadWrite | QIODevice::Text)) {
     budgetItem->setText("Error");
     return;
   }

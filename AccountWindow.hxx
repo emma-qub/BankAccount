@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QModelIndex>
 
 class CSVModel;
 class QTableView;
@@ -41,7 +42,9 @@ public:
 protected:
   QString GetCurrentCSVFileName() const;
   void UpdateSummary();
+  void GetBudgetAmounts();
   void AddSeparator();
+  void UpdateBuget(const QModelIndex& p_parentIndex = QModelIndex());
 
 protected slots:
   void GoToPreviousYear();
@@ -84,6 +87,8 @@ private:
 
   int m_month;
   int m_year;
+
+  QMap<QString, QString> m_budgetMap;
 
   QStringList m_fixedChargesList;
   QMap<QString, QStandardItem*> m_fixedChargesLabelsMap;
