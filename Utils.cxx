@@ -24,6 +24,7 @@ QStringList const Utils::CHARGES_FIXES =
     << "Charges"
     << "Cotisations Elsa"
     << "Deezer"
+    << "Disneyland"
     << "EDF"
     << "Escalade"
     << "Free"
