@@ -128,6 +128,7 @@ public:
 
 signals:
   void SaveCategoryRequested(int, QString const&, QString const&);
+  void UpdateSummaryRequested();
 
 protected:
   double GetAmount(int p_row, ColumnName p_column);

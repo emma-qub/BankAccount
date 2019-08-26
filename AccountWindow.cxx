@@ -46,6 +46,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   // CSV
   m_csvModel = new CSVModel(this);
   connect(m_csvModel, &CSVModel::SaveCategoryRequested, this, &AccountWindow::SaveCategory);
+  connect(m_csvModel, &CSVModel::UpdateSummaryRequested, this, &AccountWindow::UpdateSummary);
   auto proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setSourceModel(m_csvModel);
   m_tableView = new QTableView;
