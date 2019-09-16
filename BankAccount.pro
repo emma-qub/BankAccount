@@ -12,6 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = BankAccount
 TEMPLATE = app
+QMAKE_CXXFLAGS += "-fno-sized-deallocation"
 
 SOURCES += \
     main.cxx\
@@ -44,4 +45,4 @@ HEADERS  += \
     MonthlyBalanceGenerator.hxx \
     BudgetItemDelegate.hxx
 
-CONFIG += C++11
+CONFIG += C++17
