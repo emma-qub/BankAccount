@@ -48,6 +48,7 @@ QStringList const Utils::CHARGES_VARIABLES =
     << "Coiffeur"
     << "Déménagement"
     << "Dessin"
+    << "Disneyland"
     << "Divers"
     << "Don"
     << "Électronique"
