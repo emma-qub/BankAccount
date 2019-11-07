@@ -116,7 +116,7 @@ Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
   return flags;
 }
 
-bool CSVModel::SetSource(const QString& p_fileName, bool p_withHeader, const QChar& p_delim) {
+bool CSVModel::SetSource(QString const& p_fileName, bool p_withHeader, QChar const& p_delim) {
   beginResetModel();
   m_data.clear();
 

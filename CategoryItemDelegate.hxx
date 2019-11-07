@@ -9,9 +9,9 @@ class CategoryItemDelegate: public QStyledItemDelegate {
 public:
   explicit CategoryItemDelegate(QWidget* p_parent = nullptr);
 
-  QWidget* createEditor(QWidget* p_parent, const QStyleOptionViewItem& p_option, const QModelIndex& p_index) const override;
-  void setEditorData(QWidget* p_editor, const QModelIndex& p_index) const override;
-  void setModelData(QWidget* p_editor, QAbstractItemModel* p_model, const QModelIndex& p_index) const override;
+  QWidget* createEditor(QWidget* p_parent, QStyleOptionViewItem const& p_option, QModelIndex const& p_index) const override;
+  void setEditorData(QWidget* p_editor, QModelIndex const& p_index) const override;
+  void setModelData(QWidget* p_editor, QAbstractItemModel* p_model, QModelIndex const& p_index) const override;
 };
 
 #endif

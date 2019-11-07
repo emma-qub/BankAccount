@@ -18,7 +18,7 @@ MonthlyCSVGenerator::MonthlyCSVGenerator() {
 }
 
 void MonthlyCSVGenerator::ConvertRawCSVToMonthlyCSV(QDate const& p_date, QChar const& p_delim,
-  const QString& p_outputFileName, const QString& p_rawFileName) {
+  QString const& p_outputFileName, QString const& p_rawFileName) {
 
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = p_date.toString("MM-yyyy");
@@ -98,7 +98,7 @@ void MonthlyCSVGenerator::ConvertRawCSVToMonthlyCSV(QDate const& p_date, QChar c
   rawCSV.close();
 }
 
-void MonthlyCSVGenerator::SaveCategory(int p_row, const QString& p_group, const QString& p_category, const QString& p_inFileName) {
+void MonthlyCSVGenerator::SaveCategory(int p_row, QString const& p_group, QString const& p_category, QString const& p_inFileName) {
   QFile inFile(p_inFileName);
   if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     throw OpenFailure(inFile.errorString().toStdString().c_str());

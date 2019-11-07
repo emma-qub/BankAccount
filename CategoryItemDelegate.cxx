@@ -10,7 +10,7 @@ CategoryItemDelegate::CategoryItemDelegate(QWidget* p_parent):
 
 }
 
-QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptionViewItem& p_option, const QModelIndex& p_index) const {
+QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, QStyleOptionViewItem const& p_option, QModelIndex const& p_index) const {
   if (p_index.isValid() && p_index.column() == CSVModel::eCategory) {
     auto editor = new QComboBox(p_parent);
     auto group = p_index.sibling(p_index.row(), CSVModel::eGroup).data().toString();
@@ -25,7 +25,7 @@ QWidget* CategoryItemDelegate::createEditor(QWidget* p_parent, const QStyleOptio
   }
 }
 
-void CategoryItemDelegate::setEditorData(QWidget* p_editor, const QModelIndex& p_index) const {
+void CategoryItemDelegate::setEditorData(QWidget* p_editor, QModelIndex const& p_index) const {
   if (p_index.isValid() && (p_index.column() == CSVModel::eCategory || p_index.column() == CSVModel::eGroup)) {
     auto editor = qobject_cast<QComboBox*>(p_editor);
     editor->setCurrentText(p_index.data().toString());
@@ -34,7 +34,7 @@ void CategoryItemDelegate::setEditorData(QWidget* p_editor, const QModelIndex& p
   }
 }
 
-void CategoryItemDelegate::setModelData(QWidget* p_editor, QAbstractItemModel* p_model, const QModelIndex& p_index) const {
+void CategoryItemDelegate::setModelData(QWidget* p_editor, QAbstractItemModel* p_model, QModelIndex const& p_index) const {
   if (p_index.isValid() && (p_index.column() == CSVModel::eCategory || p_index.column() == CSVModel::eGroup)) {
     auto editor = qobject_cast<QComboBox*>(p_editor);
     p_model->setData(p_index, editor->currentText());

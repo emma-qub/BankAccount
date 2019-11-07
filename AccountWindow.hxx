@@ -40,7 +40,7 @@ protected:
   void UpdateSummary();
   void GetBudgetAmounts();
   void AddSeparator();
-  void UpdateBuget(const QModelIndex& p_parentIndex = QModelIndex());
+  void UpdateBuget(QModelIndex const& p_parentIndex = QModelIndex());
 
 protected Q_SLOTS:
   void GoToPreviousYear();
@@ -48,7 +48,7 @@ protected Q_SLOTS:
   void GoToNextMonth();
   void GoToNextYear();
   void FillModel();
-  void SaveCategory(int p_row, const QString& p_group, const QString& p_category);
+  void SaveCategory(int p_row, QString const& p_group, QString const& p_category);
   void ReloadFile();
   void UpdatePercentage(QModelIndex const& p_index);
   void SaveBudget(QModelIndex const& p_index);

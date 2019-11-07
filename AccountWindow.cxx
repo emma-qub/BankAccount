@@ -323,7 +323,7 @@ void AccountWindow::FillModel() {
   GetBudgetAmounts();
 }
 
-void AccountWindow::SaveCategory(int p_row, const QString& p_group, QString const& p_category) {
+void AccountWindow::SaveCategory(int p_row, QString const& p_group, QString const& p_category) {
   MonthlyCSVGenerator::SaveCategory(p_row, p_group, p_category, GetCurrentCSVFileName());
 }
 
@@ -562,7 +562,7 @@ void AccountWindow::ReloadFile() {
   FillModel();
 }
 
-void AccountWindow::UpdatePercentage(const QModelIndex& p_index) {
+void AccountWindow::UpdatePercentage(QModelIndex const& p_index) {
   auto row = p_index.row();
 
   auto amount = m_categoryModel->sibling(row, 1, p_index).data().toDouble();

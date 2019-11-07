@@ -14,7 +14,7 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
 
   // Category
   m_beginDateCalendar = new QDateEdit;
-  m_beginDateCalendar->setDate(QDate(2017, 1, 1));
+  m_beginDateCalendar->setDate(QDate(QDate::currentDate().year(), 1, 1));
   m_beginDateCalendar->setCalendarPopup(true);
   connect(m_beginDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
   m_endDateCalendar = new QDateEdit;

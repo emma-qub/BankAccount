@@ -22,8 +22,8 @@ public:
   inline double GetTotalAmount() const { return m_totalAmount; }
 
 protected:
-  double GetCategoryAmount(QDate const p_date) const;
-  QString GetCurrentCSVFileName(const QDate& p_date) const;
+  double GetCategoryAmount(QDate const& p_date) const;
+  QString GetCurrentCSVFileName(QDate const& p_date) const;
 
 private:
   QString m_category;

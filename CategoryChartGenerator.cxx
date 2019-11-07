@@ -70,7 +70,7 @@ QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
   return chartView;
 }
 
-double CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
+double CategoryChartGenerator::GetCategoryAmount(QDate const& p_date) const {
   auto fileName = GetCurrentCSVFileName(p_date);
   double amount = 0;
 

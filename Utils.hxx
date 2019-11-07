@@ -31,7 +31,7 @@ public:
 
   static QStringList const GetCategories();
   static QStringList const GetGroups();
-  static QStringList const GetCategoriesByGroup(const QString& p_group);
+  static QStringList const GetCategoriesByGroup(QString const& p_group);
 
   static Group GetGroupFromGroupName(QString const& p_groupName);
 
