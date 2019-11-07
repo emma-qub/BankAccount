@@ -123,8 +123,7 @@ void MonthlyCSVGenerator::SaveCategory(int p_row, const QString& p_group, const 
   QTextStream out(&outFile);
   out.setCodec("UTF-8");
   for (auto const& line: fileLines) {
-    if (line.count(';') == CSVModel::eColumnCount-1)
-    {
+    if (line.count(';') == CSVModel::eColumnCount-1) {
       out << line << "\n";
     }
   }
@@ -306,8 +305,7 @@ QString MonthlyCSVGenerator::ConvertXLSToCSV(QString const& p_xlsFileName) {
     }
     QTextStream inCsvFile(&csvFile);
     inCsvFile.setCodec("UTF-8");
-    while (inCsvFile.atEnd() == false)
-    {
+    while (inCsvFile.atEnd() == false) {
       csvOperations << inCsvFile.readLine()+"\n";
     }
     csvFile.close();
@@ -321,8 +319,7 @@ QString MonthlyCSVGenerator::ConvertXLSToCSV(QString const& p_xlsFileName) {
   inCsvFile.setCodec("UTF-8");
 
   for (auto const& newLine: newLines) {
-    if (csvOperations.contains(newLine))
-    {
+    if (csvOperations.contains(newLine)) {
       continue;
     }
     inCsvFile << newLine;

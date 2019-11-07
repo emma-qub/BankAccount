@@ -23,11 +23,8 @@ SOURCES += \
     SettingsWindow.cxx \
     MonthlyCSVGenerator.cxx \
     CategoryItemDelegate.cxx \
-    MonthlyChartGenerator.cxx \
     CategoryChartGenerator.cxx \
     Utils.cxx \
-    BalanceWindow.cxx \
-    MonthlyBalanceGenerator.cxx \
     BudgetItemDelegate.cxx
 
 HEADERS  += \
@@ -38,11 +35,8 @@ HEADERS  += \
     SettingsWindow.hxx \
     MonthlyCSVGenerator.hxx \
     CategoryItemDelegate.hxx \
-    MonthlyChartGenerator.hxx \
     CategoryChartGenerator.hxx \
     Utils.hxx \
-    BalanceWindow.hxx \
-    MonthlyBalanceGenerator.hxx \
     BudgetItemDelegate.hxx
 
 CONFIG += C++17

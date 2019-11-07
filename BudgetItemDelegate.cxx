@@ -13,9 +13,8 @@ BudgetItemDelegate::BudgetItemDelegate(QObject* p_parent):
 
 BudgetItemDelegate::~BudgetItemDelegate() = default;
 
-QWidget* BudgetItemDelegate::createEditor(QWidget* p_parent, QStyleOptionViewItem const& p_option, QModelIndex const& p_index) const
-{
-  Q_UNUSED(p_option);
+QWidget* BudgetItemDelegate::createEditor(QWidget* p_parent, QStyleOptionViewItem const& p_option, QModelIndex const& p_index) const {
+  Q_UNUSED(p_option)
 
   if (p_index.column() == 2) {
     if (p_index.data(AccountWindow::eCanHaveBudgetRole).toBool()) {
@@ -28,17 +27,14 @@ QWidget* BudgetItemDelegate::createEditor(QWidget* p_parent, QStyleOptionViewIte
   return nullptr;
 }
 
-void BudgetItemDelegate::setEditorData(QWidget* p_editor, QModelIndex const& p_index) const
-{
+void BudgetItemDelegate::setEditorData(QWidget* p_editor, QModelIndex const& p_index) const {
   if (p_index.column() == 2) {
     auto editor = qobject_cast<QDoubleSpinBox*>(p_editor);
     editor->setValue(p_index.data().toDouble());
   }
 }
 
-void BudgetItemDelegate::setModelData(
-  QWidget* p_editor, QAbstractItemModel* p_model, QModelIndex const& p_index) const
-{
+void BudgetItemDelegate::setModelData(QWidget* p_editor, QAbstractItemModel* p_model, QModelIndex const& p_index) const {
   if (p_index.column() == 2) {
     auto editor = qobject_cast<QDoubleSpinBox*>(p_editor);
     auto model = qobject_cast<QStandardItemModel*>(p_model);
@@ -49,6 +45,6 @@ void BudgetItemDelegate::setModelData(
       model->setData(p_index,  QVariant());
     }
 
-    emit BudgetUpdated(p_index);
+    Q_EMIT BudgetUpdated(p_index);
   }
 }

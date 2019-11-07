@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QtCharts/QBarSeries>
+#include <QtCharts/QLineSeries>
 #include <QtCharts/QBarSet>
 #include <QtCharts/QLegend>
 #include <QtCharts/QBarCategoryAxis>
@@ -15,7 +16,9 @@ CategoryChartGenerator::CategoryChartGenerator(QString const& p_category, QDate 
   QObject(p_parent),
   m_category(p_category),
   m_beginDate(p_beginDate),
-  m_endDate(p_endDate) {
+  m_endDate(p_endDate),
+  m_averageAmount(0.),
+  m_totalAmount(0.) {
 
   if (m_beginDate > m_endDate) {
     QDate tmpDate = m_beginDate;
@@ -33,16 +36,28 @@ QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
   auto series = new QBarSeries;
 
   QDate currDate = m_beginDate;
-  while (currDate <= m_endDate)
-  {
+  int monthsCount = 0;
+  double totalAmount = 0.;
+  while (currDate <= m_endDate) {
     auto barSet = new QBarSet(currDate.toString("MMMM yyyy"), this);
-    *barSet << GetCategoryAmount(currDate);
+    auto amount = GetCategoryAmount(currDate);
+    *barSet << amount;
     series->append(barSet);
     currDate = currDate.addMonths(1);
+
+    totalAmount += amount;
+    ++monthsCount;
   }
+
+  m_totalAmount = totalAmount;
+  m_averageAmount = totalAmount / monthsCount;
+  auto averageSeries = new QLineSeries;
+  averageSeries->append(0, m_averageAmount);
+  averageSeries->append(monthsCount, m_averageAmount);
 
   auto chart = new QChart;
   chart->addSeries(series);
+  chart->addSeries(averageSeries);
   chart->setTitle(QString("Debit for ") + m_category);
   chart->setAnimationOptions(QChart::SeriesAnimations);
   chart->createDefaultAxes();
@@ -73,8 +88,7 @@ double CategoryChartGenerator::GetCategoryAmount(const QDate p_date) const {
       continue;
     }
     auto tokensList = currentLine.split(';');
-    if (tokensList.at(CSVModel::eCategory) == m_category)
-    {
+    if (tokensList.at(CSVModel::eCategory) == m_category) {
       auto debitStr = tokensList.at(CSVModel::eDebit);
       amount -= debitStr.remove(debitStr.length()-1, 1).toDouble();
       auto creditStr = tokensList.at(CSVModel::eCredit);

@@ -23,8 +23,9 @@
 
 #include <QDebug>
 
-AccountWindow::AccountWindow(QWidget* parent):
-  QWidget(parent) {
+AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
+  QWidget(p_parent),
+  m_csvModel(p_csvModel) {
 
   // Reload action
   auto reloadAction = new QAction("Reload data...", this);
@@ -44,7 +45,7 @@ AccountWindow::AccountWindow(QWidget* parent):
   addAction(toggleAction);
 
   // CSV
-  m_csvModel = new CSVModel(this);
+
   connect(m_csvModel, &CSVModel::SaveCategoryRequested, this, &AccountWindow::SaveCategory);
   connect(m_csvModel, &CSVModel::UpdateSummaryRequested, this, &AccountWindow::UpdateSummary);
   auto proxyModel = new QSortFilterProxyModel(this);
@@ -75,11 +76,11 @@ AccountWindow::AccountWindow(QWidget* parent):
   QFontMetrics fm(font);
   m_monthLabel = new QLabel(currentDate.toString("MMMM"));
   m_monthLabel->setFont(font);
-  m_monthLabel->setFixedWidth(fm.width(QDate(1, 9, 1).toString("MMMM")));
+  m_monthLabel->setFixedWidth(fm.horizontalAdvance(QDate(1, 9, 1).toString("MMMM")));
   m_monthLabel->setAlignment(Qt::AlignCenter);
   m_yearLabel = new QLabel(currentDate.toString("yyyy"));
   m_yearLabel->setFont(font);
-  m_yearLabel->setFixedWidth(fm.width(m_yearLabel->text()));
+  m_yearLabel->setFixedWidth(fm.horizontalAdvance(m_yearLabel->text()));
   auto dateLabelLayout = new QHBoxLayout;
   dateLabelLayout->addWidget(m_monthLabel);
   dateLabelLayout->addWidget(m_yearLabel);
@@ -276,8 +277,8 @@ QString AccountWindow::GetCurrentCSVFileName() const {
 
 void AccountWindow::GoToPreviousYear() {
   m_year--;
-  emit YearChanged();
-  emit UpdateModelRequested();
+  Q_EMIT YearChanged();
+  Q_EMIT UpdateModelRequested();
 }
 
 void AccountWindow::GoToPreviousMonth() {
@@ -285,12 +286,12 @@ void AccountWindow::GoToPreviousMonth() {
   if (m_month == 1) {
     m_month = 12;
     m_year--;
-    emit YearChanged();
+    Q_EMIT YearChanged();
   } else
     m_month--;
 
-  emit MonthChanged();
-  emit UpdateModelRequested();
+  Q_EMIT MonthChanged();
+  Q_EMIT UpdateModelRequested();
 }
 
 void AccountWindow::GoToNextMonth() {
@@ -298,18 +299,18 @@ void AccountWindow::GoToNextMonth() {
   if (m_month == 12) {
     m_month = 1;
     m_year++;
-    emit YearChanged();
+    Q_EMIT YearChanged();
   } else
     m_month++;
 
-  emit MonthChanged();
-  emit UpdateModelRequested();
+  Q_EMIT MonthChanged();
+  Q_EMIT UpdateModelRequested();
 }
 
 void AccountWindow::GoToNextYear() {
   m_year++;
-  emit YearChanged();
-  emit UpdateModelRequested();
+  Q_EMIT YearChanged();
+  Q_EMIT UpdateModelRequested();
 }
 
 void AccountWindow::FillModel() {
@@ -394,15 +395,18 @@ void AccountWindow::UpdateSummary() {
     outerItem->setText(QString::number(0, 'f', 2));
     auto outterCurrentIndex = m_categoryModel->index(outterRow, 0);
     for (int row = 0; row < m_categoryModel->rowCount(outterCurrentIndex); ++row) {
-      m_categoryModel->itemFromIndex(outterCurrentIndex.child(row, 1))->setText(QString::number(0, 'f', 2));
+      auto childIndex = m_categoryModel->index(row, 1, outterCurrentIndex);
+      m_categoryModel->itemFromIndex(childIndex)->setText(QString::number(0, 'f', 2));
       auto currentIndex = m_categoryModel->index(row, 0, outterCurrentIndex);
       if (currentIndex.data(eCategoryRole).value<CategoryType>() == eVariableCharges) {
         variableChargesIndex = currentIndex;
         continue;
       }
       for (int innerRow = 0; innerRow < m_categoryModel->rowCount(currentIndex); ++innerRow) {
-        auto innerLabelItem = m_categoryModel->itemFromIndex(currentIndex.child(innerRow, 0));
-        auto innerValueItem = m_categoryModel->itemFromIndex(currentIndex.child(innerRow, 1));
+        auto childIndex0 = m_categoryModel->index(innerRow, 0, currentIndex);
+        auto innerLabelItem = m_categoryModel->itemFromIndex(childIndex0);
+        auto childIndex1 = m_categoryModel->index(innerRow, 1, currentIndex);
+        auto innerValueItem = m_categoryModel->itemFromIndex(childIndex1);
         if (currentIndex.data(eCategoryRole).value<CategoryType>() == eFixedCharges) {
           innerValueItem->setText(QString("-"));
           innerLabelItem->setForeground(QBrush(Utils::GetOrangeColor()));
@@ -509,8 +513,7 @@ void AccountWindow::UpdateSummary() {
       profit += amount;
       break;
     }
-    case Utils::eUnknown:
-    default: {
+    case Utils::eUnknown: {
       break;
     }
     }
@@ -559,8 +562,7 @@ void AccountWindow::ReloadFile() {
   FillModel();
 }
 
-void AccountWindow::UpdatePercentage(const QModelIndex& p_index)
-{
+void AccountWindow::UpdatePercentage(const QModelIndex& p_index) {
   auto row = p_index.row();
 
   auto amount = m_categoryModel->sibling(row, 1, p_index).data().toDouble();
@@ -629,8 +631,7 @@ void AccountWindow::SaveBudget(QModelIndex const& p_index) {
   }
 }
 
-void AccountWindow::AddSeparator()
-{
+void AccountWindow::AddSeparator() {
   auto separator0 = new QStandardItem("");
   separator0->setFlags(Qt::NoItemFlags);
   separator0->setData(true, eIsItemSeparatorRole);

@@ -1,17 +1,18 @@
 #ifndef CHARTWIDGET_HXX
 #define CHARTWIDGET_HXX
 
-#include "MonthlyChartGenerator.hxx"
 #include "CategoryChartGenerator.hxx"
-#include "MonthlyBalanceGenerator.hxx"
-#include "BalanceWindow.hxx"
 #include "CSVModel.hxx"
 
 #include <QWidget>
 
-class QGridLayout;
+class QVBoxLayout;
+class QHBoxLayout;
 class QComboBox;
 class QTabWidget;
+class QLabel;
+class QDateEdit;
+
 namespace QtCharts {
 class QChartView;
 }
@@ -20,30 +21,23 @@ class ChartWindow: public QWidget {
   Q_OBJECT
 
 public:
-  explicit ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_parent = nullptr);
-  inline int GetYear() const {return m_year;}
-  inline int GetMonth() const {return m_month;}
+  explicit ChartWindow(CSVModel* p_model, QWidget* p_parent = nullptr);
 
-  void UpdateMonthlyChart(int p_year, int p_month);
-  void UpdateMonthlyBalance(int p_year, int p_month);
-
-protected slots:
-  void UpdateCategoryChart(const QString& p_category);
+protected:
+  void UpdateCategoryChart();
 
 private:
   CSVModel* m_model;
-  int m_year;
-  int m_month;
-  MonthlyChartGenerator* m_monthlyChartGenerator;
+  QDateEdit* m_beginDateCalendar;
+  QDateEdit* m_endDateCalendar;
+  QHBoxLayout* m_chartOptionsLayout;
   QVBoxLayout* m_categoryChartLayout;
   QVBoxLayout* m_mainLayout;
-  QtCharts::QChartView* m_monthlyChartView;
   QtCharts::QChartView* m_categoryChartView;
+  QLabel* m_averageLabel;
+  QLabel* m_totalLabel;
   QComboBox* m_categoryComboBox;
   CategoryChartGenerator* m_categoryChartGenerator;
-  BalanceWindow* m_balanceWidget;
-  MonthlyBalanceGenerator* m_monthlyBalanceGenerator;
-  QTabWidget* m_tabWidget;
 };
 
 #endif

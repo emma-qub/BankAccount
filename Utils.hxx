@@ -5,8 +5,7 @@
 #include <QMap>
 #include <QColor>
 
-class Utils
-{
+class Utils {
 public:
   enum Group {
     eSalary,
@@ -18,7 +17,9 @@ public:
     eUnknown
   };
 
-  Utils();
+  Utils() = delete;
+  Utils(Utils const&) = delete;
+  Utils& operator=(Utils const&) = delete;
 
   static QStringList const GAIN;
   static QStringList const EPARGNE;
@@ -39,7 +40,6 @@ public:
   static QColor GetGreenColor();
   static QColor GetFadedGreenColor();
   static QColor GetOrangeColor();
-
 };
 
 #endif

@@ -1,74 +1,56 @@
 #include "ChartWindow.hxx"
 #include "Utils.hxx"
 
-#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QComboBox>
-#include <QTabWidget>
+#include <QLabel>
+#include <QDateEdit>
 #include <QtCharts/QChartView>
 
-ChartWindow::ChartWindow(CSVModel* p_model, int p_year, int p_month, QWidget* p_parent):
+ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   QWidget(p_parent),
-  m_model(p_model),
-  m_year(p_year),
-  m_month(p_month) {
-
-  m_tabWidget = new QTabWidget;
-
-  // Monthly
-  m_monthlyChartGenerator = new MonthlyChartGenerator(m_model, m_year, m_month, this);
-  m_mainLayout = new QVBoxLayout;
-  m_monthlyChartView = m_monthlyChartGenerator->CreateChartView();
-  m_tabWidget->addTab(m_monthlyChartView, "Monthly");
+  m_model(p_model) {
 
   // Category
+  m_beginDateCalendar = new QDateEdit;
+  m_beginDateCalendar->setDate(QDate(2017, 1, 1));
+  m_beginDateCalendar->setCalendarPopup(true);
+  connect(m_beginDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
+  m_endDateCalendar = new QDateEdit;
+  m_endDateCalendar->setDate(QDate::currentDate());
+  connect(m_endDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
   m_categoryComboBox = new QComboBox;
   m_categoryComboBox->addItems(Utils::GetCategories());
   connect(m_categoryComboBox, &QComboBox::currentTextChanged, this, &ChartWindow::UpdateCategoryChart);
-  m_categoryChartGenerator = new CategoryChartGenerator(m_categoryComboBox->currentText(), QDate(2017, 1, 1), QDate(2017, 12, 1));
+  m_categoryChartGenerator = new CategoryChartGenerator(
+    m_categoryComboBox->currentText(), m_beginDateCalendar->date(), m_endDateCalendar->date());
+  m_averageLabel = new QLabel;
+  m_totalLabel = new QLabel;
+  m_chartOptionsLayout = new QHBoxLayout;
+  m_chartOptionsLayout->addWidget(m_beginDateCalendar);
+  m_chartOptionsLayout->addWidget(m_endDateCalendar);
+  m_chartOptionsLayout->addWidget(m_categoryComboBox);
+  m_chartOptionsLayout->addWidget(m_averageLabel);
+  m_chartOptionsLayout->addWidget(m_totalLabel);
   m_categoryChartLayout = new QVBoxLayout;
-  m_categoryChartLayout->addWidget(m_categoryComboBox, 0, Qt::AlignCenter);
+  m_categoryChartLayout->addLayout(m_chartOptionsLayout);
   m_categoryChartView = m_categoryChartGenerator->CreateChartView();
   m_categoryChartLayout->addWidget(m_categoryChartView);
-  auto categoryWidget = new QWidget;
-  categoryWidget->setLayout(m_categoryChartLayout);
-  m_tabWidget->addTab(categoryWidget, "Categories");
 
-  // Balance
-  m_monthlyBalanceGenerator = new MonthlyBalanceGenerator(m_model, m_year, m_month, this);
-  m_balanceWidget = new BalanceWindow(m_model, m_year, m_month, m_monthlyBalanceGenerator);
-  m_tabWidget->addTab(m_balanceWidget, "Balance");
-
-  m_mainLayout->addWidget(m_tabWidget);
-
-  setLayout(m_mainLayout);
+  setLayout(m_categoryChartLayout);
 }
 
-void ChartWindow::UpdateMonthlyChart(int p_year, int p_month) {
-  m_year = p_year;
-  m_month = p_month;
-  m_monthlyChartGenerator->SetYear(m_year);
-  m_monthlyChartGenerator->SetMonth(m_month);
-
-  m_tabWidget->removeTab(0);
-  delete m_monthlyChartView;
-  m_monthlyChartView = m_monthlyChartGenerator->CreateChartView();
-  m_tabWidget->insertTab(0, m_monthlyChartView, "Monthly");
-}
-
-void ChartWindow::UpdateCategoryChart(QString const& p_category) {
-  m_categoryChartGenerator->SetCategory(p_category);
+void ChartWindow::UpdateCategoryChart() {
+  m_categoryChartGenerator->SetCategory(m_categoryComboBox->currentText());
+  m_categoryChartGenerator->SetBeginDate(m_beginDateCalendar->date());
+  m_categoryChartGenerator->SetEndDate(m_endDateCalendar->date());
 
   m_categoryChartLayout->removeWidget(m_categoryChartView);
   delete m_categoryChartView;
   m_categoryChartView = m_categoryChartGenerator->CreateChartView();
   m_categoryChartLayout->addWidget(m_categoryChartView);
-}
 
-void ChartWindow::UpdateMonthlyBalance(int p_year, int p_month) {
-  m_year = p_year;
-  m_month = p_month;
-  m_monthlyBalanceGenerator->SetYear(m_year);
-  m_monthlyBalanceGenerator->SetMonth(m_month);
-
-  m_balanceWidget->RefreshCategories();
+  m_averageLabel->setText(tr("Average: %1").arg(QString::number(m_categoryChartGenerator->GetAverageAmount())));
+  m_totalLabel->setText(tr("Total: %1").arg(QString::number(m_categoryChartGenerator->GetTotalAmount())));
 }

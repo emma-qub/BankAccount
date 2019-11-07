@@ -6,7 +6,6 @@
 class AccountWindow;
 class ChartWindow;
 class SettingsWindow;
-
 class QTabWidget;
 
 class MainWindow: public QMainWindow {

@@ -126,7 +126,7 @@ public:
   double GetCredit(int p_row);
   double GetDebit(int p_row);
 
-signals:
+Q_SIGNALS:
   void SaveCategoryRequested(int, QString const&, QString const&);
   void UpdateSummaryRequested();
 

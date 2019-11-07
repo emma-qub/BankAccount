@@ -98,9 +98,9 @@ bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int 
     }
     auto result = m_data.setValue(p_index.row(), p_index.column(), p_value.toString());
     if (result) {
-      emit SaveCategoryRequested(p_index.row(), group, category);
+      Q_EMIT SaveCategoryRequested(p_index.row(), group, category);
       if (p_index.column() == eCategory) {
-        emit UpdateSummaryRequested();
+        Q_EMIT UpdateSummaryRequested();
       }
     }
     return result;

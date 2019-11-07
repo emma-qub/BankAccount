@@ -4,6 +4,8 @@
 #include <QStyledItemDelegate>
 
 class CategoryItemDelegate: public QStyledItemDelegate {
+  Q_OBJECT
+
 public:
   explicit CategoryItemDelegate(QWidget* p_parent = nullptr);
 

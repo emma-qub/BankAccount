@@ -33,11 +33,7 @@ public:
     eSaving
   };
 
-  explicit AccountWindow(QWidget* parent = nullptr);
-
-  inline CSVModel* GetModel() const {return m_csvModel;}
-  inline int GetYear() const {return m_year;}
-  inline int GetMonth() const {return m_month;}
+  explicit AccountWindow(CSVModel* p_csvModel, QWidget* parent = nullptr);
 
 protected:
   QString GetCurrentCSVFileName() const;
@@ -46,7 +42,7 @@ protected:
   void AddSeparator();
   void UpdateBuget(const QModelIndex& p_parentIndex = QModelIndex());
 
-protected slots:
+protected Q_SLOTS:
   void GoToPreviousYear();
   void GoToPreviousMonth();
   void GoToNextMonth();
@@ -57,7 +53,7 @@ protected slots:
   void UpdatePercentage(QModelIndex const& p_index);
   void SaveBudget(QModelIndex const& p_index);
 
-signals:
+Q_SIGNALS:
   void MonthChanged();
   void YearChanged();
   void UpdateModelRequested();

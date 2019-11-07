@@ -1,8 +1,5 @@
 #include "Utils.hxx"
 
-Utils::Utils() {
-}
-
 QStringList const Utils::GAIN =
   QStringList()
     << "Amis"
@@ -97,7 +94,7 @@ QMap<Utils::Group, QStringList> const Utils::CATEGORIES_BY_GROUP =
 
 QStringList const Utils::GetCategories() {
   QStringList categories;
-  for (auto categoriesPart: CATEGORIES_BY_GROUP.values()) {
+  for (auto const& categoriesPart: CATEGORIES_BY_GROUP) {
     categories << categoriesPart;
   }
   categories.sort();
@@ -116,31 +113,26 @@ Utils::Group Utils::GetGroupFromGroupName(QString const& p_groupName) {
   return GROUP_BY_NAME.value(p_groupName);
 }
 
-QColor Utils::GetRedColor()
-{
+QColor Utils::GetRedColor() {
   return QColor("#dc3545");
 }
 
-QColor Utils::GetFadedRedColor()
-{
+QColor Utils::GetFadedRedColor() {
   auto color = GetRedColor();
   color.setAlpha(127);
   return color;
 }
 
-QColor Utils::GetGreenColor()
-{
+QColor Utils::GetGreenColor() {
   return QColor("#28a745");
 }
 
-QColor Utils::GetFadedGreenColor()
-{
+QColor Utils::GetFadedGreenColor() {
   auto color = GetGreenColor();
   color.setAlpha(127);
   return color;
 }
 
-QColor Utils::GetOrangeColor()
-{
+QColor Utils::GetOrangeColor() {
   return QColor("#fd7e14");
 }
