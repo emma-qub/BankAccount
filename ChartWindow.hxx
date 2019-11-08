@@ -8,10 +8,11 @@
 
 class QVBoxLayout;
 class QHBoxLayout;
-class QComboBox;
 class QTabWidget;
 class QLabel;
 class QDateEdit;
+class QPushButton;
+class QMenu;
 
 namespace QtCharts {
 class QChartView;
@@ -25,6 +26,10 @@ public:
 
 protected:
   void UpdateCategoryChart();
+  void SelectGroupAndUpdateCategoryChart(QAction* p_action);
+
+Q_SIGNALS:
+  void GroupToggled(QAction* p_action);
 
 private:
   CSVModel* m_model;
@@ -36,8 +41,10 @@ private:
   QtCharts::QChartView* m_categoryChartView;
   QLabel* m_averageLabel;
   QLabel* m_totalLabel;
-  QComboBox* m_categoryComboBox;
   CategoryChartGenerator* m_categoryChartGenerator;
+  QPushButton* m_categoryButton;
+  QMenu* m_categoryMenu;
+  QMap<QAction*, QList<QAction*>> m_actionsByGroup;
 };
 
 #endif

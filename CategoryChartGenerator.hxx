@@ -10,11 +10,11 @@ class CategoryChartGenerator: public QObject {
   Q_OBJECT
 
 public:
-  CategoryChartGenerator(QString const& p_category, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent = nullptr);
+  CategoryChartGenerator(const QStringList& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent = nullptr);
 
   QtCharts::QChartView* CreateChartView();
 
-  inline void SetCategory(QString const& p_category) { m_category = p_category; }
+  inline void SetCategory(QStringList const& p_categoriesList) { m_categoriesList = p_categoriesList; }
   inline void SetBeginDate(QDate const& p_beginDate) { m_beginDate = p_beginDate; }
   inline void SetEndDate(QDate const& p_endDate) { m_endDate = p_endDate; }
 
@@ -22,11 +22,11 @@ public:
   inline double GetTotalAmount() const { return m_totalAmount; }
 
 protected:
-  double GetCategoryAmount(QDate const& p_date) const;
+  QMap<QString, double> GetCategoryAmount(QDate const& p_date) const;
   QString GetCurrentCSVFileName(QDate const& p_date) const;
 
 private:
-  QString m_category;
+  QStringList m_categoriesList;
   QDate m_beginDate;
   QDate m_endDate;
   double m_averageAmount;

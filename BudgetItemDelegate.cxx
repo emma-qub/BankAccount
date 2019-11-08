@@ -5,8 +5,6 @@
 #include <QStandardItemModel>
 #include <QDoubleSpinBox>
 
-#include <QDebug>
-
 BudgetItemDelegate::BudgetItemDelegate(QObject* p_parent):
   QStyledItemDelegate(p_parent) {
 }

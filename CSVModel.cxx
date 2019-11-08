@@ -8,8 +8,6 @@
 #include <QFont>
 #include <QRegularExpression>
 
-#include <QDebug>
-
 CSVModel::CSVModel(QObject* p_parent):
   QAbstractTableModel(p_parent) {
 }

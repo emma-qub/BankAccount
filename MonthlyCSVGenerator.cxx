@@ -12,8 +12,6 @@
 #include <QDir>
 #include <QByteArrayList>
 
-#include <QDebug>
-
 MonthlyCSVGenerator::MonthlyCSVGenerator() {
 }
 

@@ -9,12 +9,14 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QLegend>
 #include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QValueAxis>
+#include <QtCharts/QStackedBarSeries>
 
 QT_CHARTS_USE_NAMESPACE
 
-CategoryChartGenerator::CategoryChartGenerator(QString const& p_category, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent):
+CategoryChartGenerator::CategoryChartGenerator(QStringList const& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent):
   QObject(p_parent),
-  m_category(p_category),
+  m_categoriesList(p_categoriesList),
   m_beginDate(p_beginDate),
   m_endDate(p_endDate),
   m_averageAmount(0.),
@@ -28,39 +30,74 @@ CategoryChartGenerator::CategoryChartGenerator(QString const& p_category, QDate 
 }
 
 QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
-  if (m_beginDate > m_endDate) {
-    qt_assert_x("QtCharts::QChartView* CategoryChartGenerator::createChartView() const",
-      "End date is superior to begin date", "CategoryChartGenerator", 25);
-  }
-
-  auto series = new QBarSeries;
+  Q_ASSERT_X(m_beginDate <= m_endDate, "CategoryChartGenerator::CreateChartView()", "End date is superior to begin date");
 
   QDate currDate = m_beginDate;
   int monthsCount = 0;
+  QMap<QString, double> totalAmounts;
+  QStringList monthLabels;
   double totalAmount = 0.;
-  while (currDate <= m_endDate) {
-    auto barSet = new QBarSet(currDate.toString("MMMM yyyy"), this);
-    auto amount = GetCategoryAmount(currDate);
-    *barSet << amount;
-    series->append(barSet);
-    currDate = currDate.addMonths(1);
 
-    totalAmount += amount;
+  QMap<QString, QBarSet*> barSets;
+  auto stackedSeries = new QStackedBarSeries;
+  for (auto const& category: m_categoriesList) {
+    auto barSet = new QBarSet(category);
+    barSets[category] = barSet;
+    stackedSeries->append(barSet);
+    totalAmounts[category] = 0.;
+  }
+
+  while (currDate <= m_endDate) {
+    auto amounts = GetCategoryAmount(currDate);
+    for (auto const& category: m_categoriesList) {
+      *barSets[category] << amounts[category];
+      totalAmounts[category] += amounts[category];
+      totalAmount += amounts[category];
+    }
+    monthLabels << currDate.toString("MMMM yyyy");
+
+    currDate = currDate.addMonths(1);
     ++monthsCount;
   }
 
+  auto chart = new QChart;
+  chart->addSeries(stackedSeries);
+
+  auto amountAxis = new QValueAxis;
+  chart->addAxis(amountAxis, Qt::AlignLeft);
+
+  int count = 0;
+  for (auto const& category: m_categoriesList) {
+    auto averageSeries = new QLineSeries;
+    averageSeries->setName(tr("Moyenne %1").arg(category));
+    auto averageAmount = totalAmounts[category]/monthsCount;
+    averageSeries->append(0, averageAmount);
+    averageSeries->append(1, averageAmount);
+    averageSeries->setColor(stackedSeries->barSets().at(count)->color());
+    chart->addSeries(averageSeries);
+    averageSeries->attachAxis(amountAxis);
+
+    ++count;
+  }
+
   m_totalAmount = totalAmount;
-  m_averageAmount = totalAmount / monthsCount;
+  m_averageAmount = totalAmount/monthsCount;
+
   auto averageSeries = new QLineSeries;
   averageSeries->append(0, m_averageAmount);
-  averageSeries->append(monthsCount, m_averageAmount);
-
-  auto chart = new QChart;
-  chart->addSeries(series);
+  averageSeries->append(1, m_averageAmount);
+  averageSeries->setName(tr("Moyenne globale"));
+  averageSeries->setColor(QColor("#333333"));
   chart->addSeries(averageSeries);
-  chart->setTitle(QString("Debit for ") + m_category);
+  averageSeries->attachAxis(amountAxis);
+
+  chart->setTitle(QString("Debit"));
   chart->setAnimationOptions(QChart::SeriesAnimations);
-  chart->createDefaultAxes();
+  auto monthsAxis = new QBarCategoryAxis;
+  monthsAxis->append(monthLabels);
+  chart->addAxis(monthsAxis, Qt::AlignBottom);
+  stackedSeries->attachAxis(monthsAxis);
+  stackedSeries->attachAxis(amountAxis);
   chart->legend()->setVisible(true);
   chart->legend()->setAlignment(Qt::AlignBottom);
 
@@ -70,13 +107,17 @@ QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
   return chartView;
 }
 
-double CategoryChartGenerator::GetCategoryAmount(QDate const& p_date) const {
+QMap<QString, double> CategoryChartGenerator::GetCategoryAmount(QDate const& p_date) const {
   auto fileName = GetCurrentCSVFileName(p_date);
-  double amount = 0;
+  QMap<QString, double> amounts;
 
   QFile file(fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
-    return amount;
+    return amounts;
+  }
+
+  for (auto const& category: m_categoriesList) {
+    amounts[category] = 0.;
   }
 
   QTextStream in(&file);
@@ -88,16 +129,17 @@ double CategoryChartGenerator::GetCategoryAmount(QDate const& p_date) const {
       continue;
     }
     auto tokensList = currentLine.split(';');
-    if (tokensList.at(CSVModel::eCategory) == m_category) {
+    auto category = tokensList.at(CSVModel::eCategory);
+    if (m_categoriesList.contains(category)) {
       auto debitStr = tokensList.at(CSVModel::eDebit);
-      amount -= debitStr.remove(debitStr.length()-1, 1).toDouble();
+      amounts[category] -= debitStr.remove(debitStr.length()-1, 1).toDouble();
       auto creditStr = tokensList.at(CSVModel::eCredit);
-      amount -= creditStr.remove(debitStr.length()-1, 1).toDouble();
+      amounts[category] -= creditStr.remove(debitStr.length()-1, 1).toDouble();
     }
   }
   file.close();
 
-  return amount;
+  return amounts;
 }
 
 QString CategoryChartGenerator::GetCurrentCSVFileName(QDate const& p_date) const {

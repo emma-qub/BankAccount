@@ -20,8 +20,7 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 #include <QStandardItem>
-
-#include <QDebug>
+#include <QTextStream>
 
 AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   QWidget(p_parent),
