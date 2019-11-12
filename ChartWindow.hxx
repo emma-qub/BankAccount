@@ -39,8 +39,8 @@ private:
   QtCharts::QChartView* m_categoryChartView;
   QLabel* m_averageLabel;
   QLabel* m_totalLabel;
-  QLabel* m_hoveredCumulLabel;
   QLabel* m_hoveredAverageLabel;
+  QLabel* m_hoveredCumulLabel;
   CategoryChartGenerator* m_categoryChartGenerator;
   QPushButton* m_categoryButton;
   QMenu* m_categoryMenu;

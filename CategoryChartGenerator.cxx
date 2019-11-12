@@ -13,6 +13,8 @@
 #include <QtCharts/QStackedBarSeries>
 #include <QtCharts/QChart>
 
+#include <limits>
+
 QT_CHARTS_USE_NAMESPACE
 
 CategoryChartGenerator::CategoryChartGenerator(QtCharts::QChartView* p_categoryChartView, QStringList const& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent):
@@ -92,8 +94,8 @@ void CategoryChartGenerator::UpdateChartView() {
     averageSeries->setColor(m_stackedSeries->barSets().at(count)->color());
     m_categoryChart->addSeries(averageSeries);
     averageSeries->attachAxis(amountAxis);
-    connect(averageSeries, &QLineSeries::hovered, this, [this, averageAmount](QPointF const&, bool p_state) {
-      p_state? Q_EMIT HoveredAverageChanged(averageAmount): Q_EMIT HoveredAverageChanged(0.);
+    connect(averageSeries, &QLineSeries::hovered, this, [this, averageAmount, category](QPointF const&, bool p_state) {
+      p_state? Q_EMIT HoveredAverageChanged(averageAmount, category): Q_EMIT HoveredAverageChanged(std::numeric_limits<double>::min(), "");
     });
 
     ++count;
@@ -105,16 +107,17 @@ void CategoryChartGenerator::UpdateChartView() {
   auto averageSeries = new QLineSeries;
   averageSeries->append(0, m_averageAmount);
   averageSeries->append(1, m_averageAmount);
-  averageSeries->setName(tr("Moyenne globale"));
+  averageSeries->setName(tr("Global Average"));
   averageSeries->setColor(QColor("#333333"));
   connect(averageSeries, &QLineSeries::hovered, this, [this](QPointF const&, bool p_state) {
-    p_state? Q_EMIT HoveredAverageChanged(m_averageAmount): Q_EMIT HoveredAverageChanged(0.);
+    p_state? Q_EMIT HoveredAverageChanged(m_averageAmount, tr("Global Average")): Q_EMIT HoveredAverageChanged(std::numeric_limits<double>::min(), "");
   });
   m_categoryChart->addSeries(averageSeries);
   averageSeries->attachAxis(amountAxis);
 
   auto monthsAxis = new QBarCategoryAxis;
   monthsAxis->append(monthLabels);
+  monthsAxis->setLabelsAngle(-90);
   m_categoryChart->addAxis(monthsAxis, Qt::AlignBottom);
   m_stackedSeries->attachAxis(monthsAxis);
   m_stackedSeries->attachAxis(amountAxis);
@@ -165,9 +168,8 @@ void CategoryChartGenerator::UpdateCurrentCumul(bool p_status, int p_index, QBar
     for (int i = 0; i <= m_stackedSeries->barSets().indexOf(p_barset); ++i) {
       cumul += m_stackedSeries->barSets().at(i)->at(p_index);
     }
-
-    Q_EMIT HoveredCumulChanged(cumul);
+    Q_EMIT HoveredCumulChanged(cumul, m_stackedSeries->barSets().at(m_stackedSeries->barSets().indexOf(p_barset))->label());
   } else {
-    Q_EMIT HoveredCumulChanged(0.);
+    Q_EMIT HoveredCumulChanged(std::numeric_limits<double>::min(), "");
   }
 }

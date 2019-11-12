@@ -57,16 +57,16 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   m_categoryChartGenerator = new CategoryChartGenerator(m_categoryChartView, {}, m_beginDateCalendar->date(), m_endDateCalendar->date());
   m_averageLabel = new QLabel(tr("Average: 0.00"));
   m_totalLabel = new QLabel(tr("Total: 0.00"));
-  m_hoveredCumulLabel = new QLabel(tr("Hovered Cumul: 0.00"));
-  m_hoveredAverageLabel = new QLabel(tr("Hovered Average: 0.00"));
+  m_hoveredAverageLabel = new QLabel(tr(""));
+  m_hoveredCumulLabel = new QLabel(tr(""));
   m_chartOptionsLayout = new QHBoxLayout;
   m_chartOptionsLayout->addWidget(m_beginDateCalendar);
   m_chartOptionsLayout->addWidget(m_endDateCalendar);
   m_chartOptionsLayout->addWidget(m_categoryButton);
   m_chartOptionsLayout->addWidget(m_averageLabel);
   m_chartOptionsLayout->addWidget(m_totalLabel);
-  m_chartOptionsLayout->addWidget(m_hoveredCumulLabel);
   m_chartOptionsLayout->addWidget(m_hoveredAverageLabel);
+  m_chartOptionsLayout->addWidget(m_hoveredCumulLabel);
   m_chartOptionsLayout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Expanding));
   m_categoryChartLayout = new QVBoxLayout;
   m_categoryChartLayout->addLayout(m_chartOptionsLayout);
@@ -74,13 +74,14 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   m_categoryChartLayout->addWidget(m_categoryChartView);
 
   connect(this, &ChartWindow::GroupToggled, this, &ChartWindow::SelectGroupAndUpdateCategoryChart);
-  connect(m_categoryChartGenerator, &CategoryChartGenerator::HoveredCumulChanged, this, [this](double p_cumul) {
-    m_hoveredCumulLabel->setText(tr("Hovered Cumul: %1").arg(QString::number(p_cumul, 'f', 2)));
+  connect(m_categoryChartGenerator, &CategoryChartGenerator::HoveredAverageChanged, this, [this](double p_average, QString const& p_category) {
+    m_hoveredAverageLabel->setVisible(!p_category.isEmpty());
+    m_hoveredAverageLabel->setText(tr("%1: %2€").arg(p_category, QString::number(p_average, 'f', 2)));
   });
-  connect(m_categoryChartGenerator, &CategoryChartGenerator::HoveredAverageChanged, this, [this](double p_average) {
-    m_hoveredAverageLabel->setText(tr("Hovered Average: %1").arg(QString::number(p_average, 'f', 2)));
+  connect(m_categoryChartGenerator, &CategoryChartGenerator::HoveredCumulChanged, this, [this](double p_cumul, QString const& p_category) {
+    m_hoveredCumulLabel->setVisible(!p_category.isEmpty());
+    m_hoveredCumulLabel->setText(tr("%1 | Cumul: %2€").arg(p_category, QString::number(p_cumul, 'f', 2)));
   });
-
   setLayout(m_categoryChartLayout);
 }
 

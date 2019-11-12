@@ -33,8 +33,8 @@ protected:
   void UpdateCurrentCumul(bool p_status, int p_index, QtCharts::QBarSet* p_barset);
 
 Q_SIGNALS:
-  void HoveredCumulChanged(double p_cumul);
-  void HoveredAverageChanged(double p_average);
+  void HoveredAverageChanged(double p_cumul, QString const& p_category);
+  void HoveredCumulChanged(double p_cumul, QString const& p_category);
 
 private:
   QStringList m_categoriesList;
