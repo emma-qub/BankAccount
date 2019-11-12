@@ -6,13 +6,19 @@
 #include <QDate>
 #include <QString>
 
+namespace QtCharts {
+class QChart;
+class QBarSet;
+class QStackedBarSeries;
+}
+
 class CategoryChartGenerator: public QObject {
   Q_OBJECT
 
 public:
-  CategoryChartGenerator(const QStringList& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent = nullptr);
+  CategoryChartGenerator(QtCharts::QChartView* p_categoryChartView, QStringList const& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent = nullptr);
 
-  QtCharts::QChartView* CreateChartView();
+  void UpdateChartView();
 
   inline void SetCategory(QStringList const& p_categoriesList) { m_categoriesList = p_categoriesList; }
   inline void SetBeginDate(QDate const& p_beginDate) { m_beginDate = p_beginDate; }
@@ -24,6 +30,11 @@ public:
 protected:
   QMap<QString, double> GetCategoryAmount(QDate const& p_date) const;
   QString GetCurrentCSVFileName(QDate const& p_date) const;
+  void UpdateCurrentCumul(bool p_status, int p_index, QtCharts::QBarSet* p_barset);
+
+Q_SIGNALS:
+  void HoveredCumulChanged(double p_cumul);
+  void HoveredAverageChanged(double p_average);
 
 private:
   QStringList m_categoriesList;
@@ -31,6 +42,9 @@ private:
   QDate m_endDate;
   double m_averageAmount;
   double m_totalAmount;
+  QtCharts::QChartView* m_categoryChartView;
+  QtCharts::QChart* m_categoryChart;
+  QtCharts::QStackedBarSeries* m_stackedSeries;
 };
 
 #endif

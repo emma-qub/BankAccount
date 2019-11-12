@@ -14,9 +14,7 @@ class QDateEdit;
 class QPushButton;
 class QMenu;
 
-namespace QtCharts {
-class QChartView;
-}
+#include <QtCharts/QStackedBarSeries>
 
 class ChartWindow: public QWidget {
   Q_OBJECT
@@ -41,6 +39,8 @@ private:
   QtCharts::QChartView* m_categoryChartView;
   QLabel* m_averageLabel;
   QLabel* m_totalLabel;
+  QLabel* m_hoveredCumulLabel;
+  QLabel* m_hoveredAverageLabel;
   CategoryChartGenerator* m_categoryChartGenerator;
   QPushButton* m_categoryButton;
   QMenu* m_categoryMenu;
