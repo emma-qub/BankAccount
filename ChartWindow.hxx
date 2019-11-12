@@ -13,6 +13,7 @@ class QLabel;
 class QDateEdit;
 class QPushButton;
 class QMenu;
+class QRadioButton;
 
 #include <QtCharts/QStackedBarSeries>
 
@@ -24,6 +25,7 @@ public:
 
 protected:
   void UpdateCategoryChart();
+  void UpdateGroupChart();
   void SelectGroupAndUpdateCategoryChart(QAction* p_action);
 
 Q_SIGNALS:
@@ -42,8 +44,12 @@ private:
   QLabel* m_hoveredAverageLabel;
   QLabel* m_hoveredCumulLabel;
   CategoryChartGenerator* m_categoryChartGenerator;
+  QRadioButton* m_categoryRadioButton;
   QPushButton* m_categoryButton;
   QMenu* m_categoryMenu;
+  QRadioButton* m_groupRadioButton;
+  QPushButton* m_groupButton;
+  QMenu* m_groupMenu;
   QMap<QAction*, QList<QAction*>> m_actionsByGroup;
 };
 

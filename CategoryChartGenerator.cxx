@@ -1,7 +1,5 @@
 #include "CategoryChartGenerator.hxx"
 
-#include "CSVModel.hxx"
-
 #include <QFile>
 #include <QTextStream>
 #include <QtCharts/QBarSeries>
@@ -17,9 +15,11 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-CategoryChartGenerator::CategoryChartGenerator(QtCharts::QChartView* p_categoryChartView, QStringList const& p_categoriesList, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent):
+CategoryChartGenerator::CategoryChartGenerator(QtCharts::QChartView* p_categoryChartView, QDate const& p_beginDate, QDate const& p_endDate, QObject* p_parent):
   QObject(p_parent),
-  m_categoriesList(p_categoriesList),
+  m_chartType(eNone),
+  m_groupsList({}),
+  m_categoriesList({}),
   m_beginDate(p_beginDate),
   m_endDate(p_endDate),
   m_averageAmount(0.),
@@ -60,7 +60,10 @@ void CategoryChartGenerator::UpdateChartView() {
   m_stackedSeries->setLabelsVisible(true);
   m_stackedSeries->setLabelsFormat("@value");
   connect(m_stackedSeries, &QStackedBarSeries::hovered, this, &CategoryChartGenerator::UpdateCurrentCumul);
-  for (auto const& category: m_categoriesList) {
+
+  auto const& list = GetList();
+
+  for (auto const& category: list) {
     auto barSet = new QBarSet(category);
     barSets[category] = barSet;
     m_stackedSeries->append(barSet);
@@ -69,10 +72,10 @@ void CategoryChartGenerator::UpdateChartView() {
 
   while (currDate <= m_endDate) {
     auto amounts = GetCategoryAmount(currDate);
-    for (auto const& category: m_categoriesList) {
-      *barSets[category] << amounts[category];
-      totalAmounts[category] += amounts[category];
-      totalAmount += amounts[category];
+    for (auto const& label: list) {
+      *barSets[label] << amounts[label];
+      totalAmounts[label] += amounts[label];
+      totalAmount += amounts[label];
     }
     monthLabels << currDate.toString("MM/yy");
 
@@ -85,17 +88,17 @@ void CategoryChartGenerator::UpdateChartView() {
   m_categoryChart->addSeries(m_stackedSeries);
 
   int count = 0;
-  for (auto const& category: m_categoriesList) {
+  for (auto const& label: list) {
     auto averageSeries = new QLineSeries;
-    averageSeries->setName(tr("Moyenne %1").arg(category));
-    auto averageAmount = totalAmounts[category]/monthsCount;
+    averageSeries->setName(tr("Moyenne %1").arg(label));
+    auto averageAmount = totalAmounts[label]/monthsCount;
     averageSeries->append(0, averageAmount);
     averageSeries->append(1, averageAmount);
     averageSeries->setColor(m_stackedSeries->barSets().at(count)->color());
     m_categoryChart->addSeries(averageSeries);
     averageSeries->attachAxis(amountAxis);
-    connect(averageSeries, &QLineSeries::hovered, this, [this, averageAmount, category](QPointF const&, bool p_state) {
-      p_state? Q_EMIT HoveredAverageChanged(averageAmount, category): Q_EMIT HoveredAverageChanged(std::numeric_limits<double>::min(), "");
+    connect(averageSeries, &QLineSeries::hovered, this, [this, averageAmount, label](QPointF const&, bool p_state) {
+      p_state? Q_EMIT HoveredAverageChanged(averageAmount, label): Q_EMIT HoveredAverageChanged(std::numeric_limits<double>::min(), "");
     });
 
     ++count;
@@ -132,7 +135,8 @@ QMap<QString, double> CategoryChartGenerator::GetCategoryAmount(QDate const& p_d
     return amounts;
   }
 
-  for (auto const& category: m_categoriesList) {
+  auto const& list = GetList();
+  for (auto const& category: list) {
     amounts[category] = 0.;
   }
 
@@ -145,12 +149,12 @@ QMap<QString, double> CategoryChartGenerator::GetCategoryAmount(QDate const& p_d
       continue;
     }
     auto tokensList = currentLine.split(';');
-    auto category = tokensList.at(CSVModel::eCategory);
-    if (m_categoriesList.contains(category)) {
+    auto label = tokensList.at(GetColumnName());
+    if (list.contains(label)) {
       auto debitStr = tokensList.at(CSVModel::eDebit);
-      amounts[category] -= debitStr.remove(debitStr.length()-1, 1).toDouble();
+      amounts[label] -= debitStr.remove(debitStr.length()-1, 1).toDouble();
       auto creditStr = tokensList.at(CSVModel::eCredit);
-      amounts[category] -= creditStr.remove(debitStr.length()-1, 1).toDouble();
+      amounts[label] -= creditStr.remove(debitStr.length()-1, 1).toDouble();
     }
   }
   file.close();
@@ -171,5 +175,27 @@ void CategoryChartGenerator::UpdateCurrentCumul(bool p_status, int p_index, QBar
     Q_EMIT HoveredCumulChanged(cumul, m_stackedSeries->barSets().at(m_stackedSeries->barSets().indexOf(p_barset))->label());
   } else {
     Q_EMIT HoveredCumulChanged(std::numeric_limits<double>::min(), "");
+  }
+}
+
+QStringList const& CategoryChartGenerator::GetList() const {
+  switch (m_chartType) {
+  case eGroups:
+    return m_groupsList;
+  case eCategories:
+    return m_categoriesList;
+  case eNone:
+    Q_ASSERT_X(false, "CategoryChartGenerator::GetChartTypeList", "Chart type is not set");
+  }
+}
+
+CSVModel::ColumnName CategoryChartGenerator::GetColumnName() const {
+  switch (m_chartType) {
+  case eGroups:
+    return CSVModel::eGroup;
+  case eCategories:
+    return CSVModel::eCategory;
+  case eNone:
+    Q_ASSERT_X(false, "CategoryChartGenerator::GetChartTypeLabel", "Chart type is not set");
   }
 }

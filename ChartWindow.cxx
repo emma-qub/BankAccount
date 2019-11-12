@@ -9,6 +9,8 @@
 #include <QStandardItemModel>
 #include <QPushButton>
 #include <QMenu>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -28,7 +30,8 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   m_endDateCalendar->setDate(QDate::currentDate());
   connect(m_endDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
 
-  m_categoryButton = new QPushButton("Select categories");
+  m_categoryRadioButton = new QRadioButton;
+  m_categoryButton = new QPushButton(tr("Select categories"));
   m_categoryMenu = new QMenu;
   m_categoryButton->setMenu(m_categoryMenu);
   bool noAction = true;
@@ -53,8 +56,27 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
     }
     noAction = false;
   }
+  connect(m_categoryRadioButton, &QRadioButton::toggled, m_categoryButton, &QPushButton::setEnabled);
+  m_categoryRadioButton->toggle();
 
-  m_categoryChartGenerator = new CategoryChartGenerator(m_categoryChartView, {}, m_beginDateCalendar->date(), m_endDateCalendar->date());
+  m_groupRadioButton = new QRadioButton;
+  m_groupButton = new QPushButton(tr("Select a group"));
+  m_groupButton->setEnabled(false);
+  m_groupMenu = new QMenu;
+  m_groupButton->setMenu(m_groupMenu);
+  for (auto const& group: Utils::GROUP_BY_NAME.keys()) {
+    auto action = new QAction(group);
+    action->setCheckable(true);
+    connect(action, &QAction::toggled, this, &ChartWindow::UpdateGroupChart);
+    m_groupMenu->addAction(action);
+  }
+  connect(m_groupRadioButton, &QRadioButton::toggled, m_groupButton, &QPushButton::setEnabled);
+
+  auto radioGroup = new QButtonGroup(this);
+  radioGroup->addButton(m_categoryRadioButton);
+  radioGroup->addButton(m_groupRadioButton);
+
+  m_categoryChartGenerator = new CategoryChartGenerator(m_categoryChartView, m_beginDateCalendar->date(), m_endDateCalendar->date());
   m_averageLabel = new QLabel(tr("Average: 0.00"));
   m_totalLabel = new QLabel(tr("Total: 0.00"));
   m_hoveredAverageLabel = new QLabel(tr(""));
@@ -62,7 +84,10 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   m_chartOptionsLayout = new QHBoxLayout;
   m_chartOptionsLayout->addWidget(m_beginDateCalendar);
   m_chartOptionsLayout->addWidget(m_endDateCalendar);
+  m_chartOptionsLayout->addWidget(m_categoryRadioButton);
   m_chartOptionsLayout->addWidget(m_categoryButton);
+  m_chartOptionsLayout->addWidget(m_groupRadioButton);
+  m_chartOptionsLayout->addWidget(m_groupButton);
   m_chartOptionsLayout->addWidget(m_averageLabel);
   m_chartOptionsLayout->addWidget(m_totalLabel);
   m_chartOptionsLayout->addWidget(m_hoveredAverageLabel);
@@ -82,6 +107,7 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
     m_hoveredCumulLabel->setVisible(!p_category.isEmpty());
     m_hoveredCumulLabel->setText(tr("%1 | Cumul: %2€").arg(p_category, QString::number(p_cumul, 'f', 2)));
   });
+
   setLayout(m_categoryChartLayout);
 }
 
@@ -93,7 +119,29 @@ void ChartWindow::UpdateCategoryChart() {
     }
   }
 
-  m_categoryChartGenerator->SetCategory(categories);
+  m_categoryChartGenerator->SetChartType(CategoryChartGenerator::eCategories);
+  m_categoryChartGenerator->SetGroups({});
+  m_categoryChartGenerator->SetCategories(categories);
+  m_categoryChartGenerator->SetBeginDate(m_beginDateCalendar->date());
+  m_categoryChartGenerator->SetEndDate(m_endDateCalendar->date());
+
+  m_categoryChartGenerator->UpdateChartView();
+
+  m_averageLabel->setText(tr("Average: %1€").arg(QString::number(m_categoryChartGenerator->GetAverageAmount(), 'f', 2)));
+  m_totalLabel->setText(tr("Total: %1€").arg(QString::number(m_categoryChartGenerator->GetTotalAmount(), 'f', 2)));
+}
+
+void ChartWindow::UpdateGroupChart() {
+  QStringList groups;
+  for (auto action: m_groupMenu->actions()) {
+    if (action->isChecked()) {
+      groups << action->text();
+    }
+  }
+
+  m_categoryChartGenerator->SetChartType(CategoryChartGenerator::eGroups);
+  m_categoryChartGenerator->SetGroups(groups);
+  m_categoryChartGenerator->SetCategories({});
   m_categoryChartGenerator->SetBeginDate(m_beginDateCalendar->date());
   m_categoryChartGenerator->SetEndDate(m_endDateCalendar->date());
 
