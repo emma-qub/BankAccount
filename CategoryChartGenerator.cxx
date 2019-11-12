@@ -54,7 +54,7 @@ QtCharts::QChartView* CategoryChartGenerator::CreateChartView() {
       totalAmounts[category] += amounts[category];
       totalAmount += amounts[category];
     }
-    monthLabels << currDate.toString("MMMM yyyy");
+    monthLabels << currDate.toString("MM/yy");
 
     currDate = currDate.addMonths(1);
     ++monthsCount;

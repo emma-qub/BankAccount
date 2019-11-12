@@ -3,7 +3,6 @@
 QStringList const Utils::GAIN =
   QStringList()
     << "Amis"
-    << "CE"
     << "Famille"
     << "Ventes";
 
