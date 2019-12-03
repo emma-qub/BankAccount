@@ -44,7 +44,6 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   addAction(toggleAction);
 
   // CSV
-
   connect(m_csvModel, &CSVModel::SaveCategoryRequested, this, &AccountWindow::SaveCategory);
   connect(m_csvModel, &CSVModel::UpdateSummaryRequested, this, &AccountWindow::UpdateSummary);
   auto proxyModel = new QSortFilterProxyModel(this);
@@ -441,7 +440,9 @@ void AccountWindow::UpdateSummary() {
       break;
     }
     case Utils::eFixedCharges: {
-      Q_ASSERT_X(m_fixedChargesList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown fixed charge: %1").arg(categoryName).toStdString().c_str());
+      if (!m_fixedChargesList.contains(categoryName))
+        break;
+
       auto currentItem = m_fixedChargesLabelsMap[categoryName];
       auto currentValueItem = m_fixedChargesValuesMap[categoryName];
       currentItem->setForeground(currentValueItem->foreground());
@@ -491,7 +492,9 @@ void AccountWindow::UpdateSummary() {
       break;
     }
     case Utils::eFood: {
-      Q_ASSERT_X(m_foodList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown food: %1").arg(categoryName).toStdString().c_str());
+      if (!m_foodList.contains(categoryName))
+        break;
+
       auto currentValueItem = m_foodValuesMap[categoryName];
       auto oldAmount = currentValueItem->text().toDouble();
       auto newAmount = amount + oldAmount;
@@ -504,7 +507,9 @@ void AccountWindow::UpdateSummary() {
       break;
     }
     case Utils::eProfit: {
-      Q_ASSERT_X(m_profitList.contains(categoryName), "AccountWindow::updateSummary()", tr("Unknown profit: %1").arg(categoryName).toStdString().c_str());
+      if (!m_profitList.contains(categoryName))
+        break;
+
       auto currentValueItem = m_profitValuesMap[categoryName];
       auto oldAmount = currentValueItem->text().toDouble();
       auto newAmount = amount + oldAmount;

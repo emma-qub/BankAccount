@@ -38,10 +38,12 @@ QStringList const Utils::NOURRITURE =
 QStringList const Utils::CHARGES_VARIABLES =
   QStringList()
     << "Beauté"
+    << "Billeterie"
     << "Cadeau donné"
     << "Chat"
     << "Cinéma"
     << "Coiffeur"
+    << "Décoration"
     << "Déménagement"
     << "Dessin"
     << "Disneyland"

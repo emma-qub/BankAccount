@@ -20,11 +20,16 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
     } else if (p_role == Qt::ForegroundRole) {
       if (column == eCredit) {
         return Utils::GetGreenColor();
-      } else if ((column == eCategory || column == eGroup) && p_index.data() == "Unknown") {
-        return Utils::GetOrangeColor();
+      } else if ((column == eCategory || column == eGroup)) {
+        if (p_index.data() == "Unknown") {
+          return Utils::GetOrangeColor();
+        } else {
+          if (column == eCategory && !CategoryBelongsToGroup(p_index)) {
+            return Utils::GetRedColor();
+          }
+        }
       }
-    } else if (p_role == Qt::FontRole &&
-      (column == eDebit|| column == eCredit || ((column == eCategory || column == eGroup) && p_index.data() == "Unknown"))) {
+    } else if (p_role == Qt::FontRole && IsBold(p_index)) {
       QFont font;
       font.setBold(true);
       return font;
@@ -157,4 +162,20 @@ double CSVModel::GetDebit(int p_row) {
 
 double CSVModel::GetAmount(int p_row, ColumnName p_column) {
   return m_data[p_row][p_column].remove("€").toDouble();
+}
+
+bool CSVModel::CategoryBelongsToGroup(QModelIndex const& p_categoryIndex) const {
+  QModelIndex groupIndex = p_categoryIndex.siblingAtColumn(eGroup);
+
+  return Utils::GetCategoriesByGroup(groupIndex.data().toString()).contains(p_categoryIndex.data().toString());
+}
+
+bool CSVModel::IsBold(QModelIndex const& p_index) const {
+  auto column = p_index.column();
+
+  auto isDebit = (column == eDebit);
+  auto isCredit = (column == eCredit);
+  auto isUnknown = ((column == eCategory || column == eGroup) && p_index.data() == "Unknown");
+  auto isNotACategory = (column == eCategory && !CategoryBelongsToGroup(p_index));
+  return isDebit || isCredit || isUnknown || isNotACategory;
 }

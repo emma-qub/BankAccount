@@ -133,6 +133,9 @@ Q_SIGNALS:
 protected:
   double GetAmount(int p_row, ColumnName p_column);
 
+  bool CategoryBelongsToGroup(QModelIndex const& p_categoryIndex) const;
+  bool IsBold(QModelIndex const& p_index) const;
+
 private:
   TableData<QString> m_data;
 };
