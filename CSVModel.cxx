@@ -1,5 +1,6 @@
 #include "CSVModel.hxx"
 
+#include "CategoriesModel.hxx"
 #include "Utils.hxx"
 
 #include <QFile>
@@ -8,8 +9,9 @@
 #include <QFont>
 #include <QRegularExpression>
 
-CSVModel::CSVModel(QObject* p_parent):
-  QAbstractTableModel(p_parent) {
+CSVModel::CSVModel(CategoriesModel* p_categoriesModel, QObject* p_parent):
+  QAbstractTableModel(p_parent),
+  m_categoriesModel(p_categoriesModel) {
 }
 
 QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
@@ -167,7 +169,7 @@ double CSVModel::GetAmount(int p_row, ColumnName p_column) {
 bool CSVModel::CategoryBelongsToGroup(QModelIndex const& p_categoryIndex) const {
   QModelIndex groupIndex = p_categoryIndex.siblingAtColumn(eGroup);
 
-  return Utils::GetCategoriesByGroup(groupIndex.data().toString()).contains(p_categoryIndex.data().toString());
+  return m_categoriesModel->GetCategoriesByGroup(groupIndex.data().toString()).contains(p_categoryIndex.data().toString());
 }
 
 bool CSVModel::IsBold(QModelIndex const& p_index) const {

@@ -5,14 +5,16 @@
 #include "AccountWindow.hxx"
 #include "ChartWindow.hxx"
 #include "SettingsWindow.hxx"
+#include "CategoriesModel.hxx"
 
 MainWindow::MainWindow(QWidget* parent):
   QMainWindow(parent) {
 
-  auto csvModel = new CSVModel(this);
-  m_accountWindow = new AccountWindow(csvModel);
-  m_chartWindow = new ChartWindow(csvModel);
-  m_settingsWindow = new SettingsWindow;
+  auto categoriesModel = new CategoriesModel(this);
+  auto csvModel = new CSVModel(categoriesModel, this);
+  m_accountWindow = new AccountWindow(csvModel, categoriesModel);
+  m_chartWindow = new ChartWindow(csvModel, categoriesModel);
+  m_settingsWindow = new SettingsWindow(categoriesModel);
 
   m_tabWidget = new QTabWidget;
   m_tabWidget->addTab(m_accountWindow, QIcon("../BankAccount/icons/accountTab"), "");

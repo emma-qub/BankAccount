@@ -3,11 +3,18 @@
 
 #include <QWidget>
 
+class CategoriesModel;
+class QTreeView;
+
 class SettingsWindow: public QWidget {
   Q_OBJECT
 
 public:
-  explicit SettingsWindow(QWidget* p_parent = nullptr);
+  explicit SettingsWindow(CategoriesModel* p_categoriesModel, QWidget* p_parent = nullptr);
+
+private:
+  CategoriesModel* m_categoriesModel;
+  QTreeView* m_categoriesView;
 };
 
 #endif

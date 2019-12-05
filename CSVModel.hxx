@@ -3,6 +3,8 @@
 
 #include <QAbstractTableModel>
 
+class CategoriesModel;
+
 template<typename T>
 class TableData {
 public:
@@ -111,7 +113,7 @@ public:
     eColumnCount
   };
 
-  explicit CSVModel(QObject* p_parent = nullptr);
+  explicit CSVModel(CategoriesModel* p_categoriesModel, QObject* p_parent = nullptr);
 
   int rowCount(QModelIndex const& = QModelIndex()) const override { return m_data.rowCount(); }
   int columnCount(QModelIndex const& = QModelIndex()) const override { return m_data.columnCount(); }
@@ -138,6 +140,7 @@ protected:
 
 private:
   TableData<QString> m_data;
+  CategoriesModel* m_categoriesModel;
 };
 
 #endif

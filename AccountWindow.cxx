@@ -1,6 +1,7 @@
 #include "AccountWindow.hxx"
 
 #include "CSVModel.hxx"
+#include "CategoriesModel.hxx"
 #include "MonthlyCSVGenerator.hxx"
 #include "CategoryItemDelegate.hxx"
 #include "Utils.hxx"
@@ -22,9 +23,10 @@
 #include <QStandardItem>
 #include <QTextStream>
 
-AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
+AccountWindow::AccountWindow(CSVModel* p_csvModel, CategoriesModel* p_categoriesModel, QWidget* p_parent):
   QWidget(p_parent),
-  m_csvModel(p_csvModel) {
+  m_csvModel(p_csvModel),
+  m_categoriesModel(p_categoriesModel) {
 
   // Reload action
   auto reloadAction = new QAction("Reload data...", this);
@@ -38,8 +40,8 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   toggleAction->setCheckable(true);
   connect(toggleAction, &QAction::toggled, this, [this](bool p_toggle){
     p_toggle ?
-      m_categoryView->expandAll():
-      m_categoryView->expandToDepth(0);
+      m_summaryView->expandAll():
+      m_summaryView->expandToDepth(0);
   });
   addAction(toggleAction);
 
@@ -57,8 +59,8 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   }
   m_tableView->setFocusPolicy(Qt::NoFocus);
   m_tableView->setSelectionMode(QTableView::NoSelection);
-  m_tableView->setItemDelegateForColumn(CSVModel::eCategory, new CategoryItemDelegate);
-  m_tableView->setItemDelegateForColumn(CSVModel::eGroup, new CategoryItemDelegate);
+  m_tableView->setItemDelegateForColumn(CSVModel::eCategory, new CategoryItemDelegate(m_categoriesModel, m_tableView));
+  m_tableView->setItemDelegateForColumn(CSVModel::eGroup, new CategoryItemDelegate(m_categoriesModel, m_tableView));
   m_tableView->setSortingEnabled(true);
 
   // Current date
@@ -111,13 +113,13 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   dateLayout->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Expanding, QSizePolicy::Preferred));
 
   // Summary model view
-  m_categoryView = new QTreeView;
-  m_categoryModel = new QStandardItemModel;
-  m_categoryModel->setColumnCount(4);
-  m_categoryView->setModel(m_categoryModel);
-  m_categoryView->setHeaderHidden(true);
-  auto budgetItemDelegate = new BudgetItemDelegate(m_categoryView);
-  m_categoryView->setItemDelegate(budgetItemDelegate);
+  m_summaryView = new QTreeView;
+  m_summaryModel = new QStandardItemModel;
+  m_summaryModel->setColumnCount(4);
+  m_summaryView->setModel(m_summaryModel);
+  m_summaryView->setHeaderHidden(true);
+  auto budgetItemDelegate = new BudgetItemDelegate(m_summaryView);
+  m_summaryView->setItemDelegate(budgetItemDelegate);
 
   // In
   auto inItem = new QStandardItem("In");
@@ -140,8 +142,7 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   m_profitItem->setTextAlignment(Qt::AlignRight);
   auto profitLabelItem = new QStandardItem("Gain");
   profitLabelItem->setData(QVariant::fromValue<CategoryType>(eProfit), eCategoryRole);
-  m_profitList = Utils::GAIN;
-  for (auto const& profit: m_profitList) {
+  for (auto const& profit: m_categoriesModel->GetCategoriesByGroup("Gain")) {
     auto currentProfitItem = new QStandardItem(profit);
     auto currentProfitValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentProfitValueItem->setTextAlignment(Qt::AlignRight);
@@ -166,8 +167,7 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   m_fixedChargesItem->setTextAlignment(Qt::AlignRight);
   auto fixedChargesLabelItem = new QStandardItem("Charges fixes");
   fixedChargesLabelItem->setData(QVariant::fromValue<CategoryType>(eFixedCharges), eCategoryRole);
-  m_fixedChargesList = Utils::CHARGES_FIXES;
-  for (auto const& fixedCharge: m_fixedChargesList) {
+  for (auto const& fixedCharge: m_categoriesModel->GetCategoriesByGroup("Charges fixes")) {
     auto currentFixedChargeItem = new QStandardItem(fixedCharge);
     currentFixedChargeItem->setForeground(QBrush(Utils::GetOrangeColor()));
     auto currentFixedChargeValueItem = new QStandardItem(QString::number(0, 'f', 2));
@@ -188,8 +188,7 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   m_foodItem->setTextAlignment(Qt::AlignRight);
   auto foodLabelItem = new QStandardItem("Nourriture");
   foodLabelItem->setData(QVariant::fromValue<CategoryType>(eFood), eCategoryRole);
-  m_foodList = Utils::NOURRITURE;
-  for (auto const& food: m_foodList) {
+  for (auto const& food: m_categoriesModel->GetCategoriesByGroup("Nourriture")) {
     auto currentFoodItem = new QStandardItem(food);
     auto currentFoodValueItem = new QStandardItem(QString::number(0, 'f', 2));
     currentFoodValueItem->setTextAlignment(Qt::AlignRight);
@@ -223,24 +222,24 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   inColumn2->setBackground(QBrush(Utils::GetFadedGreenColor()));
   auto inColumn3 = new QStandardItem;
   inColumn3->setBackground(QBrush(Utils::GetFadedGreenColor()));
-  m_categoryModel->appendRow({inItem, m_inItem, inColumn2, inColumn3});
+  m_summaryModel->appendRow({inItem, m_inItem, inColumn2, inColumn3});
   AddSeparator();
   auto outColumn2 = new QStandardItem;
   outColumn2->setBackground(QBrush(Utils::GetFadedRedColor()));
   auto outColumn3 = new QStandardItem;
   outColumn3->setBackground(QBrush(Utils::GetFadedRedColor()));
-  m_categoryModel->appendRow({outItem, m_outItem, outColumn2, outColumn3});
+  m_summaryModel->appendRow({outItem, m_outItem, outColumn2, outColumn3});
   auto separator2 = new QStandardItem("");
   separator2->setSelectable(false);
   AddSeparator();
   auto balanceItem = new QStandardItem("Équilibre");
   balanceItem->setFont(balanceItemFont);
-  m_categoryModel->appendRow({balanceItem, m_balanceItem, new QStandardItem, new QStandardItem});
+  m_summaryModel->appendRow({balanceItem, m_balanceItem, new QStandardItem, new QStandardItem});
 
   // Summary layout
   auto summaryAndDateLayout = new QVBoxLayout;
   summaryAndDateLayout->addLayout(dateLayout);
-  summaryAndDateLayout->addWidget(m_categoryView);
+  summaryAndDateLayout->addWidget(m_summaryView);
 
   // Main layout
   auto mainLayout = new QHBoxLayout;
@@ -258,7 +257,7 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   connect(this, &AccountWindow::YearChanged, this, [this](){m_yearLabel->setText(QString::number(m_year));});
   connect(this, &AccountWindow::MonthChanged, this, [this](){m_monthLabel->setText(QDate(1, m_month, 1).toString("MMMM"));});
   connect(this, &AccountWindow::UpdateModelRequested, this, &AccountWindow::FillModel);
-  connect(m_categoryView, &QTreeView::expanded, this, [this](){m_categoryView->resizeColumnToContents(0);});
+  connect(m_summaryView, &QTreeView::expanded, this, [this](){m_summaryView->resizeColumnToContents(0);});
   connect(budgetItemDelegate, &BudgetItemDelegate::BudgetUpdated, this, &AccountWindow::UpdatePercentage);
   connect(budgetItemDelegate, &BudgetItemDelegate::BudgetUpdated, this, &AccountWindow::SaveBudget);
 
@@ -266,7 +265,7 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, QWidget* p_parent):
   FillModel();
 
   // Expand view
-  m_categoryView->expandToDepth(0);
+  m_summaryView->expandToDepth(0);
 }
 
 QString AccountWindow::GetCurrentCSVFileName() const {
@@ -348,16 +347,16 @@ void AccountWindow::GetBudgetAmounts() {
 }
 
 void AccountWindow::UpdateBuget(QModelIndex const& p_parentIndex) {
-  for (int row = 0; row < m_categoryModel->rowCount(p_parentIndex); ++row) {
-    auto currentLabelIndex = m_categoryModel->index(row, 0, p_parentIndex);
-    auto currentBudgetIndex = m_categoryModel->sibling(row, 2, currentLabelIndex);
+  for (int row = 0; row < m_summaryModel->rowCount(p_parentIndex); ++row) {
+    auto currentLabelIndex = m_summaryModel->index(row, 0, p_parentIndex);
+    auto currentBudgetIndex = m_summaryModel->sibling(row, 2, currentLabelIndex);
     if (currentBudgetIndex.data(eCanHaveBudgetRole).toBool()) {
       auto currentLabel = currentLabelIndex.data().toString();
       QString budget;
       if (m_budgetMap.contains(currentLabel)) {
         budget = m_budgetMap[currentLabel];
       }
-      m_categoryModel->itemFromIndex(currentBudgetIndex)->setText(budget);
+      m_summaryModel->itemFromIndex(currentBudgetIndex)->setText(budget);
       UpdatePercentage(currentBudgetIndex);
     }
     UpdateBuget(currentLabelIndex);
@@ -376,7 +375,7 @@ void AccountWindow::UpdateSummary() {
   double out = 0;
 
   // Clean fixed charges state
-  for (auto const& fixedCharge: m_fixedChargesList) {
+  for (auto const& fixedCharge: m_categoriesModel->GetCategoriesByGroup("")) {
     auto fixedChargeLabelItem = m_fixedChargesLabelsMap[fixedCharge];
     QFont validateFont(fixedChargeLabelItem->font());
     validateFont.setBold(false);
@@ -385,26 +384,26 @@ void AccountWindow::UpdateSummary() {
 
   // Clean values
   QModelIndex variableChargesIndex;
-  for (int outterRow = 0; outterRow < m_categoryModel->rowCount(); ++outterRow) {
-    auto outerItem = m_categoryModel->item(outterRow, 1);
+  for (int outterRow = 0; outterRow < m_summaryModel->rowCount(); ++outterRow) {
+    auto outerItem = m_summaryModel->item(outterRow, 1);
     if (outerItem->data(eIsItemSeparatorRole).toBool()) {
       continue;
     }
     outerItem->setText(QString::number(0, 'f', 2));
-    auto outterCurrentIndex = m_categoryModel->index(outterRow, 0);
-    for (int row = 0; row < m_categoryModel->rowCount(outterCurrentIndex); ++row) {
-      auto childIndex = m_categoryModel->index(row, 1, outterCurrentIndex);
-      m_categoryModel->itemFromIndex(childIndex)->setText(QString::number(0, 'f', 2));
-      auto currentIndex = m_categoryModel->index(row, 0, outterCurrentIndex);
+    auto outterCurrentIndex = m_summaryModel->index(outterRow, 0);
+    for (int row = 0; row < m_summaryModel->rowCount(outterCurrentIndex); ++row) {
+      auto childIndex = m_summaryModel->index(row, 1, outterCurrentIndex);
+      m_summaryModel->itemFromIndex(childIndex)->setText(QString::number(0, 'f', 2));
+      auto currentIndex = m_summaryModel->index(row, 0, outterCurrentIndex);
       if (currentIndex.data(eCategoryRole).value<CategoryType>() == eVariableCharges) {
         variableChargesIndex = currentIndex;
         continue;
       }
-      for (int innerRow = 0; innerRow < m_categoryModel->rowCount(currentIndex); ++innerRow) {
-        auto childIndex0 = m_categoryModel->index(innerRow, 0, currentIndex);
-        auto innerLabelItem = m_categoryModel->itemFromIndex(childIndex0);
-        auto childIndex1 = m_categoryModel->index(innerRow, 1, currentIndex);
-        auto innerValueItem = m_categoryModel->itemFromIndex(childIndex1);
+      for (int innerRow = 0; innerRow < m_summaryModel->rowCount(currentIndex); ++innerRow) {
+        auto childIndex0 = m_summaryModel->index(innerRow, 0, currentIndex);
+        auto innerLabelItem = m_summaryModel->itemFromIndex(childIndex0);
+        auto childIndex1 = m_summaryModel->index(innerRow, 1, currentIndex);
+        auto innerValueItem = m_summaryModel->itemFromIndex(childIndex1);
         if (currentIndex.data(eCategoryRole).value<CategoryType>() == eFixedCharges) {
           innerValueItem->setText(QString("-"));
           innerLabelItem->setForeground(QBrush(Utils::GetOrangeColor()));
@@ -418,8 +417,8 @@ void AccountWindow::UpdateSummary() {
   // Clean Variable charges
   Q_ASSERT_X(variableChargesIndex.isValid(), "AccountWindow::UpdateSummary()", "Could not find variableChargesIndex");
   QList<QStandardItem*> variableChargesItemsList;
-  int rc = m_categoryModel->rowCount(variableChargesIndex);
-  auto variableChargesItem = m_categoryModel->itemFromIndex(variableChargesIndex);
+  int rc = m_summaryModel->rowCount(variableChargesIndex);
+  auto variableChargesItem = m_summaryModel->itemFromIndex(variableChargesIndex);
   for (int row = 0; row < rc; ++row) {
     variableChargesItemsList << variableChargesItem->takeRow(0);
   }
@@ -429,18 +428,18 @@ void AccountWindow::UpdateSummary() {
 
   // Update amounts
   for (int row = 0; row < m_csvModel->rowCount(); ++row) {
-    QString groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
+    auto groupName = m_csvModel->index(row, CSVModel::eGroup).data().toString();
     auto amount = m_csvModel->GetCredit(row) + m_csvModel->GetDebit(row);
-    Utils::Group group = Utils::GetGroupFromGroupName(groupName);
-    QString categoryName = m_csvModel->index(row, CSVModel::eCategory).data().toString();
+    auto group = CategoriesModel::GROUP_BY_NAME[groupName];
+    auto categoryName = m_csvModel->index(row, CSVModel::eCategory).data().toString();
 
     switch(group) {
-    case Utils::eSalary: {
+    case CategoriesModel::eSalary: {
       salary += amount;
       break;
     }
-    case Utils::eFixedCharges: {
-      if (!m_fixedChargesList.contains(categoryName))
+    case CategoriesModel::eFixedCharges: {
+      if (!m_categoriesModel->GetCategoriesByGroup("Charges fixes").contains(categoryName))
         break;
 
       auto currentItem = m_fixedChargesLabelsMap[categoryName];
@@ -456,7 +455,7 @@ void AccountWindow::UpdateSummary() {
       fixedCharges += amount;
       break;
     }
-    case Utils::eVariableCharges: {
+    case CategoriesModel::eVariableCharges: {
       QStandardItem* currentLabelItem = nullptr;
       QStandardItem* currentValueItem = nullptr;
       auto currentBudgetItem = new QStandardItem;
@@ -467,7 +466,7 @@ void AccountWindow::UpdateSummary() {
         currentLabelItem = m_variableChargesLabelsMap[categoryName];
         currentValueItem = m_variableChargesValuesMap[categoryName];
         auto currentLabelIndex = currentLabelItem->index();
-        currentPercentageItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(currentLabelIndex.row(), 3, currentLabelIndex));
+        currentPercentageItem = m_summaryModel->itemFromIndex(m_summaryModel->sibling(currentLabelIndex.row(), 3, currentLabelIndex));
       } else {
         currentLabelItem = new QStandardItem(categoryName);
         currentValueItem = new QStandardItem(QString::number(0, 'f', 2));
@@ -491,8 +490,8 @@ void AccountWindow::UpdateSummary() {
       variableCharges += amount;
       break;
     }
-    case Utils::eFood: {
-      if (!m_foodList.contains(categoryName))
+    case CategoriesModel::eFood: {
+      if (!m_categoriesModel->GetCategoriesByGroup("Nourriture").contains(categoryName))
         break;
 
       auto currentValueItem = m_foodValuesMap[categoryName];
@@ -502,12 +501,12 @@ void AccountWindow::UpdateSummary() {
       food += amount;
       break;
     }
-    case Utils::eSaving: {
+    case CategoriesModel::eSaving: {
       saving += amount;
       break;
     }
-    case Utils::eProfit: {
-      if (!m_profitList.contains(categoryName))
+    case CategoriesModel::eProfit: {
+      if (!m_categoriesModel->GetCategoriesByGroup("Gain").contains(categoryName))
         break;
 
       auto currentValueItem = m_profitValuesMap[categoryName];
@@ -517,7 +516,7 @@ void AccountWindow::UpdateSummary() {
       profit += amount;
       break;
     }
-    case Utils::eUnknown: {
+    case CategoriesModel::eUnknown: {
       break;
     }
     }
@@ -543,8 +542,8 @@ void AccountWindow::UpdateSummary() {
   balance < 0 ? color = Utils::GetRedColor() : color = Utils::GetGreenColor();
   m_balanceItem->setForeground(QBrush(color));
 
-  m_categoryView->setColumnWidth(2, 40);
-  m_categoryView->setColumnWidth(3, 60);
+  m_summaryView->setColumnWidth(2, 40);
+  m_summaryView->setColumnWidth(3, 60);
 }
 
 void AccountWindow::ReloadFile() {
@@ -569,21 +568,21 @@ void AccountWindow::ReloadFile() {
 void AccountWindow::UpdatePercentage(QModelIndex const& p_index) {
   auto row = p_index.row();
 
-  auto amount = m_categoryModel->sibling(row, 1, p_index).data().toDouble();
-  auto budget = m_categoryModel->sibling(row, 2, p_index).data().toDouble();
+  auto amount = m_summaryModel->sibling(row, 1, p_index).data().toDouble();
+  auto budget = m_summaryModel->sibling(row, 2, p_index).data().toDouble();
 
   QVariant newPercentage;
   if (budget != 0.) {
     newPercentage = QString::number(-amount/budget*100., 'f', 2)+"%";
   }
 
-  auto percentageItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(row, 3, p_index));
+  auto percentageItem = m_summaryModel->itemFromIndex(m_summaryModel->sibling(row, 3, p_index));
   percentageItem->setData(newPercentage, Qt::DisplayRole);
 }
 
 void AccountWindow::SaveBudget(QModelIndex const& p_index) {
-  auto budgetItem = m_categoryModel->itemFromIndex(p_index);
-  auto labelItem = m_categoryModel->itemFromIndex(m_categoryModel->sibling(p_index.row(), 0, p_index));
+  auto budgetItem = m_summaryModel->itemFromIndex(p_index);
+  auto labelItem = m_summaryModel->itemFromIndex(m_summaryModel->sibling(p_index.row(), 0, p_index));
 
   QString csvDirectoryPath = "../BankAccount/csv";
   QString accountDirectoryName = QDate(m_year, m_month, 1).toString("MM-yyyy");
@@ -642,5 +641,5 @@ void AccountWindow::AddSeparator() {
   auto separator1 = new QStandardItem("");
   separator1->setFlags(Qt::NoItemFlags);
   separator1->setData(true, eIsItemSeparatorRole);
-  m_categoryModel->appendRow({separator0, separator1, new QStandardItem, new QStandardItem});
+  m_summaryModel->appendRow({separator0, separator1, new QStandardItem, new QStandardItem});
 }

@@ -15,6 +15,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += "-fno-sized-deallocation"
 
 SOURCES += \
+    CategoriesModel.cxx \
     main.cxx\
     MainWindow.cxx \
     CSVModel.cxx \
@@ -28,6 +29,7 @@ SOURCES += \
     BudgetItemDelegate.cxx
 
 HEADERS  += \
+    CategoriesModel.hxx \
     MainWindow.hxx \
     CSVModel.hxx \
     AccountWindow.hxx \

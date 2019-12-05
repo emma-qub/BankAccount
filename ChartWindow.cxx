@@ -1,5 +1,6 @@
 #include "ChartWindow.hxx"
-#include "Utils.hxx"
+
+#include "CategoriesModel.hxx"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,9 +15,10 @@
 
 QT_CHARTS_USE_NAMESPACE
 
-ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
+ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, QWidget* p_parent):
   QWidget(p_parent),
   m_model(p_model),
+  m_categoriesModel(p_categoriesModel),
   m_categoryChartView(new QChartView) {
 
   m_categoryChartView->setRenderHint(QPainter::Antialiasing);
@@ -34,42 +36,53 @@ ChartWindow::ChartWindow(CSVModel* p_model, QWidget* p_parent):
   m_categoryButton = new QPushButton(tr("Select categories"));
   m_categoryMenu = new QMenu;
   m_categoryButton->setMenu(m_categoryMenu);
-  bool noAction = true;
-  for (auto const& group: Utils::GROUP_BY_NAME.keys()) {
-    if (!noAction) {
-      m_categoryMenu->addSeparator();
-    }
-    auto groupAction = new QAction(group);
-    m_categoryMenu->addAction(groupAction);
-    auto groupFont = groupAction->font();
-    groupFont.setBold(true);
-    groupAction->setFont(groupFont);
-    groupAction->setCheckable(true);
-    connect(groupAction, &QAction::toggled, this, [this, groupAction](){Q_EMIT GroupToggled(groupAction);});
-    m_actionsByGroup[groupAction] = QList<QAction*>();
-    for (auto const& category: Utils::CATEGORIES_BY_GROUP[Utils::GROUP_BY_NAME[group]]) {
-      auto action = new QAction(category);
-      action->setCheckable(true);
-      m_categoryMenu->addAction(action);
-      connect(action, &QAction::toggled, this, &ChartWindow::UpdateCategoryChart);
-      m_actionsByGroup[groupAction] << action;
-    }
-    noAction = false;
-  }
-  connect(m_categoryRadioButton, &QRadioButton::toggled, m_categoryButton, &QPushButton::setEnabled);
-  m_categoryRadioButton->toggle();
 
   m_groupRadioButton = new QRadioButton;
   m_groupButton = new QPushButton(tr("Select a group"));
   m_groupButton->setEnabled(false);
   m_groupMenu = new QMenu;
   m_groupButton->setMenu(m_groupMenu);
-  for (auto const& group: Utils::GROUP_BY_NAME.keys()) {
-    auto action = new QAction(group);
-    action->setCheckable(true);
-    connect(action, &QAction::toggled, this, &ChartWindow::UpdateGroupChart);
-    m_groupMenu->addAction(action);
+
+  bool noAction = true;
+  for (int groupRow = 0; groupRow < m_categoriesModel->rowCount(); ++groupRow) {
+    auto const& groupIndex = m_categoriesModel->index(groupRow, 0);
+    auto groupName = groupIndex.data().toString();
+
+    // Categories menu
+    if (!noAction) {
+      m_categoryMenu->addSeparator();
+    }
+
+    auto groupActionForCategoriesMenu = new QAction(groupName);
+    m_categoryMenu->addAction(groupActionForCategoriesMenu);
+    auto groupFont = groupActionForCategoriesMenu->font();
+    groupFont.setBold(true);
+    groupActionForCategoriesMenu->setFont(groupFont);
+    groupActionForCategoriesMenu->setCheckable(true);
+    connect(groupActionForCategoriesMenu, &QAction::toggled, this, [this, groupActionForCategoriesMenu](){Q_EMIT GroupToggled(groupActionForCategoriesMenu);});
+    m_actionsByGroup[groupActionForCategoriesMenu] = QList<QAction*>();
+
+    for (int categoryRow = 0; categoryRow < m_categoriesModel->rowCount(groupIndex); ++ categoryRow) {
+      auto const& categoryIndex = m_categoriesModel->index(categoryRow, 0, groupIndex);
+
+      auto action = new QAction(categoryIndex.data().toString());
+      action->setCheckable(true);
+      m_categoryMenu->addAction(action);
+      connect(action, &QAction::toggled, this, &ChartWindow::UpdateCategoryChart);
+      m_actionsByGroup[groupActionForCategoriesMenu] << action;
+    }
+    noAction = false;
+
+    // Groups menu
+    auto groupActionForGroupsMenu = new QAction(groupName);
+    groupActionForGroupsMenu->setCheckable(true);
+    connect(groupActionForGroupsMenu, &QAction::toggled, this, &ChartWindow::UpdateGroupChart);
+    m_groupMenu->addAction(groupActionForGroupsMenu);
   }
+
+  connect(m_categoryRadioButton, &QRadioButton::toggled, m_categoryButton, &QPushButton::setEnabled);
+  m_categoryRadioButton->toggle();
+
   connect(m_groupRadioButton, &QRadioButton::toggled, m_groupButton, &QPushButton::setEnabled);
 
   auto radioGroup = new QButtonGroup(this);

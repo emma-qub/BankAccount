@@ -6,6 +6,7 @@
 #include <QModelIndex>
 
 class CSVModel;
+class CategoriesModel;
 class QTableView;
 class QStandardItemModel;
 class QTreeView;
@@ -33,7 +34,7 @@ public:
     eSaving
   };
 
-  explicit AccountWindow(CSVModel* p_csvModel, QWidget* parent = nullptr);
+  explicit AccountWindow(CSVModel* p_csvModel, CategoriesModel* p_categoriesModel, QWidget* parent = nullptr);
 
 protected:
   QString GetCurrentCSVFileName() const;
@@ -60,6 +61,7 @@ Q_SIGNALS:
 
 private:
   CSVModel* m_csvModel;
+  CategoriesModel* m_categoriesModel;
   QTableView* m_tableView;
 
   QLabel* m_monthLabel;
@@ -69,8 +71,8 @@ private:
   QPushButton* m_nextMonth;
   QPushButton* m_nextYear;
 
-  QStandardItemModel* m_categoryModel;
-  QTreeView* m_categoryView;
+  QStandardItemModel* m_summaryModel;
+  QTreeView* m_summaryView;
   QStandardItem* m_salaryItem;
   QStandardItem* m_fixedChargesItem;
   QStandardItem* m_variableChargesItem;
@@ -86,19 +88,15 @@ private:
 
   QMap<QString, QString> m_budgetMap;
 
-  QStringList m_fixedChargesList;
   QMap<QString, QStandardItem*> m_fixedChargesLabelsMap;
   QMap<QString, QStandardItem*> m_fixedChargesValuesMap;
 
-  QStringList m_variableChargesList;
   QMap<QString, QStandardItem*> m_variableChargesLabelsMap;
   QMap<QString, QStandardItem*> m_variableChargesValuesMap;
 
-  QStringList m_profitList;
   QMap<QString, QStandardItem*> m_profitLabelsMap;
   QMap<QString, QStandardItem*> m_profitValuesMap;
 
-  QStringList m_foodList;
   QMap<QString, QStandardItem*> m_foodLabelsMap;
   QMap<QString, QStandardItem*> m_foodValuesMap;
 

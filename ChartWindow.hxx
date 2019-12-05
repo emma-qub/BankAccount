@@ -2,10 +2,11 @@
 #define CHARTWIDGET_HXX
 
 #include "CategoryChartGenerator.hxx"
-#include "CSVModel.hxx"
 
 #include <QWidget>
 
+class CSVModel;
+class CategoriesModel;
 class QVBoxLayout;
 class QHBoxLayout;
 class QTabWidget;
@@ -21,7 +22,7 @@ class ChartWindow: public QWidget {
   Q_OBJECT
 
 public:
-  explicit ChartWindow(CSVModel* p_model, QWidget* p_parent = nullptr);
+  explicit ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, QWidget* p_parent = nullptr);
 
 protected:
   void UpdateCategoryChart();
@@ -33,8 +34,11 @@ Q_SIGNALS:
 
 private:
   CSVModel* m_model;
+  CategoriesModel* m_categoriesModel;
+
   QDateEdit* m_beginDateCalendar;
   QDateEdit* m_endDateCalendar;
+
   QHBoxLayout* m_chartOptionsLayout;
   QVBoxLayout* m_categoryChartLayout;
   QVBoxLayout* m_mainLayout;
