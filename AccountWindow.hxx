@@ -42,6 +42,7 @@ protected:
   void GetBudgetAmounts();
   void AddSeparator();
   void UpdateBuget(QModelIndex const& p_parentIndex = QModelIndex());
+  void TryToFillClassicOperations();
 
 protected Q_SLOTS:
   void GoToPreviousYear();

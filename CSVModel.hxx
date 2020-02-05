@@ -110,7 +110,7 @@ public:
     eDebit,
     eCredit,
 
-    eColumnCount
+    eColumnCount,
   };
 
   explicit CSVModel(CategoriesModel* p_categoriesModel, QObject* p_parent = nullptr);
@@ -128,6 +128,8 @@ public:
   double GetCredit(int p_row);
   double GetDebit(int p_row);
 
+  void ActivateAutoFilledAt(int p_row);
+
 Q_SIGNALS:
   void SaveCategoryRequested(int, QString const&, QString const&);
   void UpdateSummaryRequested();
@@ -141,6 +143,7 @@ protected:
 private:
   TableData<QString> m_data;
   CategoriesModel* m_categoriesModel;
+  QMap<int, bool> m_autoFilledMap;
 };
 
 #endif

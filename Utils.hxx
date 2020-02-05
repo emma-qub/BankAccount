@@ -14,6 +14,7 @@ public:
   static QColor GetGreenColor();
   static QColor GetFadedGreenColor();
   static QColor GetOrangeColor();
+  static QColor GetAutoFilledColor();
 
 };
 

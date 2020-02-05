@@ -29,3 +29,7 @@
 
 # Qt project files
 *.pro.user*
+
+# zip and tar.gz
+*.zip
+*.tar.gz

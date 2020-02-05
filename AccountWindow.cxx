@@ -34,6 +34,12 @@ AccountWindow::AccountWindow(CSVModel* p_csvModel, CategoriesModel* p_categories
   connect(reloadAction, &QAction::triggered, this, &AccountWindow::ReloadFile);
   addAction(reloadAction);
 
+  // Automatic fill groups and categories
+  auto fillGroupsAndCategoriesAction = new QAction("Fill groups and categories", this);
+  fillGroupsAndCategoriesAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_F));
+  connect(fillGroupsAndCategoriesAction, &QAction::triggered, this, &AccountWindow::TryToFillClassicOperations);
+  addAction(fillGroupsAndCategoriesAction);
+
   // Toggle action
   auto toggleAction = new QAction("Toggle nul values", this);
   toggleAction->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_T));
@@ -344,6 +350,52 @@ void AccountWindow::GetBudgetAmounts() {
   }
 
   UpdateBuget();
+}
+
+void AccountWindow::TryToFillClassicOperations() {
+  QFile prefillFile("../BankAccount/prefill/prefill.txt");
+
+  if (!prefillFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    return;
+  }
+
+  std::map<QString, QStringList> groupsAndCategoriesFromLabel;
+  QTextStream inPrefillFile(&prefillFile);
+  inPrefillFile.setCodec("UTF-8");
+
+  while (!inPrefillFile.atEnd()) {
+    auto line = inPrefillFile.readLine();
+    auto groupAndCategory = line.split(';');
+    auto label = groupAndCategory.takeFirst();
+    groupsAndCategoriesFromLabel[label] = groupAndCategory;
+  }
+
+  prefillFile.close();
+
+  auto unknownString = "Unknown";
+  for (int row = 0; row < m_csvModel->rowCount(); ++row) {
+    auto categoryIndex = m_csvModel->index(row, CSVModel::eCategory);
+    auto groupIndex = m_csvModel->index(row, CSVModel::eGroup);
+    if (categoryIndex.data() == unknownString && groupIndex.data() == unknownString) {
+      auto label = m_csvModel->index(row, CSVModel::eLabel).data().toString();
+      QStringList groupAndCategory;
+      for (auto const& pair: groupsAndCategoriesFromLabel) {
+        auto currLabel = pair.first;
+        auto currGroupAndCategory = pair.second;
+        if (label.contains(currLabel)) {
+          groupAndCategory = currGroupAndCategory;
+          break;
+        }
+      }
+      if (!groupAndCategory.isEmpty()) {
+        auto group = groupAndCategory.at(0);
+        auto category = groupAndCategory.at(1);
+        m_csvModel->setData(groupIndex, group);
+        m_csvModel->setData(categoryIndex, category);
+        m_csvModel->ActivateAutoFilledAt(row);
+      }
+    }
+  }
 }
 
 void AccountWindow::UpdateBuget(QModelIndex const& p_parentIndex) {

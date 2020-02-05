@@ -1,0 +1,22 @@
+CB  ADOBE PHOTOGPHY;Charges fixes;Adobe
+PRLV GENERALI VIE SA;Charges fixes;Assurance
+COTISATION MENSUELLE CARTE;Charges fixes;Banque
+PRLV SEPA SDC LE CHAMPAGNEUX;Charges fixes;Charges
+PRLV SEPA EURO DISNEY;Charges fixes;Disneyland (Abo)
+PRLV SEPA EDF;Charges fixes;EDF
+PRLV SEPA LYON ESCALADE;Charges fixes;Escalade (Abo)
+CB  FREE MOBILE;Charges fixes;Free
+PRLV SEPA Free Telecom;Charges fixes;Free
+VIREMENT FLEURY QUENTIN;Charges fixes;Garage
+PRLV SEPA DIRECTION GENERALE D;Charges fixes;Impôts
+PRET IMMOBILIER;Charges fixes;Loyer
+CB  TWITCH;Charges fixes;Patreon
+CB  PATREON* MEMBERS;Charges fixes;Patreon
+CB  S.L.T.C.;Charges fixes;TCL
+CB  IKEA;Charges variables;Meubles
+CB  SNCF;Charges variables;SNCF
+CB  SUPER U;Nourriture;Courses
+CB  SETEPI;Nourriture;Restaurant
+CB  VAPIANO;Nourriture;Restaurant
+CB  LA VIE CLAIRE;Nourriture;Courses
+VIREMENT COSMO TECH;Salaire;Salaire

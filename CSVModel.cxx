@@ -28,6 +28,8 @@ QVariant CSVModel::data(QModelIndex const& p_index, int p_role) const {
         } else {
           if (column == eCategory && !CategoryBelongsToGroup(p_index)) {
             return Utils::GetRedColor();
+          } else if (m_autoFilledMap[p_index.row()]) {
+            return Utils::GetAutoFilledColor();
           }
         }
       }
@@ -107,6 +109,7 @@ bool CSVModel::setData(QModelIndex const& p_index, QVariant const& p_value, int 
       if (p_index.column() == eCategory) {
         Q_EMIT UpdateSummaryRequested();
       }
+      Q_EMIT dataChanged(p_index, p_index);
     }
     return result;
   }
@@ -124,6 +127,7 @@ Qt::ItemFlags CSVModel::flags(QModelIndex const& p_index) const {
 bool CSVModel::SetSource(QString const& p_fileName, bool p_withHeader, QChar const& p_delim) {
   beginResetModel();
   m_data.clear();
+  m_autoFilledMap.clear();
 
   QFile file(p_fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -162,6 +166,10 @@ double CSVModel::GetDebit(int p_row) {
   return GetAmount(p_row, eDebit);
 }
 
+void CSVModel::ActivateAutoFilledAt(int p_row) {
+  m_autoFilledMap[p_row] = true;
+}
+
 double CSVModel::GetAmount(int p_row, ColumnName p_column) {
   return m_data[p_row][p_column].remove("€").toDouble();
 }
@@ -179,5 +187,6 @@ bool CSVModel::IsBold(QModelIndex const& p_index) const {
   auto isCredit = (column == eCredit);
   auto isUnknown = ((column == eCategory || column == eGroup) && p_index.data() == "Unknown");
   auto isNotACategory = (column == eCategory && !CategoryBelongsToGroup(p_index));
-  return isDebit || isCredit || isUnknown || isNotACategory;
+  auto isAutoFilled = m_autoFilledMap.contains(p_index.row());
+  return isDebit || isCredit || isUnknown || isNotACategory || isAutoFilled;
 }

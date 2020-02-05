@@ -23,3 +23,7 @@ QColor Utils::GetFadedGreenColor() {
 QColor Utils::GetOrangeColor() {
   return QColor("#fd7e14");
 }
+
+QColor Utils::GetAutoFilledColor() {
+  return QColor("#1b628e");
+}
