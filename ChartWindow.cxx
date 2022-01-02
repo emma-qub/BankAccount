@@ -13,6 +13,8 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 
+#include <QDebug>
+
 QT_CHARTS_USE_NAMESPACE
 
 ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, QWidget* p_parent):
@@ -27,10 +29,11 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
   m_beginDateCalendar = new QDateEdit;
   m_beginDateCalendar->setDate(QDate(QDate::currentDate().year(), 1, 1));
   m_beginDateCalendar->setCalendarPopup(true);
-  connect(m_beginDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
+  connect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
   m_endDateCalendar = new QDateEdit;
   m_endDateCalendar->setDate(QDate::currentDate());
-  connect(m_endDateCalendar, &QDateEdit::dateTimeChanged, this, &ChartWindow::UpdateCategoryChart);
+  m_endDateCalendar->setCalendarPopup(true);
+  connect(m_endDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
 
   m_categoryRadioButton = new QRadioButton;
   m_categoryButton = new QPushButton(tr("Select categories"));
@@ -42,6 +45,8 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
   m_groupButton->setEnabled(false);
   m_groupMenu = new QMenu;
   m_groupButton->setMenu(m_groupMenu);
+
+  m_balanceRadioButton = new QRadioButton(tr("Balance"));
 
   bool noAction = true;
   for (int groupRow = 0; groupRow < m_categoriesModel->rowCount(); ++groupRow) {
@@ -80,6 +85,8 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
     m_groupMenu->addAction(groupActionForGroupsMenu);
   }
 
+  connect(m_balanceRadioButton, &QRadioButton::toggled, this, &ChartWindow::UpdateBalanceChart);
+
   connect(m_categoryRadioButton, &QRadioButton::toggled, m_categoryButton, &QPushButton::setEnabled);
   m_categoryRadioButton->toggle();
 
@@ -88,6 +95,7 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
   auto radioGroup = new QButtonGroup(this);
   radioGroup->addButton(m_categoryRadioButton);
   radioGroup->addButton(m_groupRadioButton);
+  radioGroup->addButton(m_balanceRadioButton);
 
   m_categoryChartGenerator = new CategoryChartGenerator(m_categoryChartView, m_beginDateCalendar->date(), m_endDateCalendar->date());
   m_averageLabel = new QLabel(tr("Average: 0.00"));
@@ -101,6 +109,7 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
   m_chartOptionsLayout->addWidget(m_categoryButton);
   m_chartOptionsLayout->addWidget(m_groupRadioButton);
   m_chartOptionsLayout->addWidget(m_groupButton);
+  m_chartOptionsLayout->addWidget(m_balanceRadioButton);
   m_chartOptionsLayout->addWidget(m_averageLabel);
   m_chartOptionsLayout->addWidget(m_totalLabel);
   m_chartOptionsLayout->addWidget(m_hoveredAverageLabel);
@@ -120,6 +129,21 @@ ChartWindow::ChartWindow(CSVModel* p_model, CategoriesModel* p_categoriesModel, 
     m_hoveredCumulLabel->setVisible(!p_category.isEmpty());
     m_hoveredCumulLabel->setText(tr("%1 | Cumul: %2€").arg(p_category, QString::number(p_cumul, 'f', 2)));
   });
+
+  auto useCurrentYearAction = new QAction(this);
+  addAction(useCurrentYearAction);
+  useCurrentYearAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+  connect(useCurrentYearAction, &QAction::triggered, this, &ChartWindow::UseCurrentYear);
+
+  auto decreaseOneYearAction = new QAction(this);
+  addAction(decreaseOneYearAction);
+  decreaseOneYearAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
+  connect(decreaseOneYearAction, &QAction::triggered, this, [this](){ ChangeYear(false); });
+
+  auto increaseOneYearAction = new QAction(this);
+  addAction(increaseOneYearAction);
+  increaseOneYearAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus));
+  connect(increaseOneYearAction, &QAction::triggered, this, [this](){ ChangeYear(true); });
 
   setLayout(m_categoryChartLayout);
 }
@@ -164,6 +188,35 @@ void ChartWindow::UpdateGroupChart() {
   m_totalLabel->setText(tr("Total: %1€").arg(QString::number(m_categoryChartGenerator->GetTotalAmount(), 'f', 2)));
 }
 
+void ChartWindow::UpdateBalanceChart() {
+  m_categoryChartGenerator->SetChartType(CategoryChartGenerator::eBalance);
+  m_categoryChartGenerator->SetGroups({});
+  m_categoryChartGenerator->SetCategories({});
+  m_categoryChartGenerator->SetBeginDate(m_beginDateCalendar->date());
+  m_categoryChartGenerator->SetEndDate(m_endDateCalendar->date());
+
+  m_categoryChartGenerator->UpdateChartView();
+
+  m_averageLabel->setText(tr("Average: %1€").arg(QString::number(m_categoryChartGenerator->GetAverageAmount(), 'f', 2)));
+  m_totalLabel->setText(tr("Total: %1€").arg(QString::number(m_categoryChartGenerator->GetTotalAmount(), 'f', 2)));
+}
+
+void ChartWindow::UpdateChartAccordingToType() {
+  if (m_endDateCalendar->date() < m_beginDateCalendar->date()) {
+    disconnect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+    m_beginDateCalendar->setDate(m_endDateCalendar->date());
+    connect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  }
+
+  if (m_balanceRadioButton->isChecked()) {
+    UpdateBalanceChart();
+  } else if (m_categoryRadioButton->isChecked()) {
+    UpdateCategoryChart();
+  } else if (m_groupRadioButton->isChecked()) {
+    UpdateGroupChart();
+  }
+}
+
 void ChartWindow::SelectGroupAndUpdateCategoryChart(QAction* p_action) {
   auto actionsList = m_actionsByGroup[p_action];
   for (auto action: actionsList) {
@@ -173,4 +226,26 @@ void ChartWindow::SelectGroupAndUpdateCategoryChart(QAction* p_action) {
   }
 
   UpdateCategoryChart();
+}
+
+void ChartWindow::UseCurrentYear() {
+  disconnect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  m_beginDateCalendar->setDate(QDate(QDate::currentDate().year(), 1, 1));
+  connect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  m_endDateCalendar->setDate(QDate(QDate::currentDate().year(), 12, 31));
+}
+
+void ChartWindow::ChangeYear(bool p_add) {
+  auto increment = p_add? 1: -1;
+
+  disconnect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  disconnect(m_endDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  auto beginDate = m_beginDateCalendar->date();
+  m_beginDateCalendar->setDate(QDate(beginDate.year()+increment, beginDate.month(), beginDate.day()));
+  auto endDate = m_endDateCalendar->date();
+  m_endDateCalendar->setDate(QDate(endDate.year()+increment, endDate.month(), endDate.day()));
+  connect(m_beginDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+  connect(m_endDateCalendar, &QDateEdit::dateChanged, this, &ChartWindow::UpdateChartAccordingToType);
+
+  UpdateChartAccordingToType();
 }

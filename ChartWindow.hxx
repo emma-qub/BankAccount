@@ -27,7 +27,11 @@ public:
 protected:
   void UpdateCategoryChart();
   void UpdateGroupChart();
+  void UpdateBalanceChart();
+  void UpdateChartAccordingToType();
   void SelectGroupAndUpdateCategoryChart(QAction* p_action);
+  void UseCurrentYear();
+  void ChangeYear(bool p_add);
 
 Q_SIGNALS:
   void GroupToggled(QAction* p_action);
@@ -53,6 +57,7 @@ private:
   QMenu* m_categoryMenu;
   QRadioButton* m_groupRadioButton;
   QPushButton* m_groupButton;
+  QRadioButton* m_balanceRadioButton;
   QMenu* m_groupMenu;
   QMap<QAction*, QList<QAction*>> m_actionsByGroup;
 };

@@ -21,6 +21,7 @@ public:
   enum ChartTypes {
     eCategories,
     eGroups,
+    eBalance,
     eNone
   };
 

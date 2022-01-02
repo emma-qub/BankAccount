@@ -5,6 +5,7 @@ Chat
 Cinéma
 Coiffeur
 Cotisations Elsa
+Cours de japonais
 Décoration
 Déménagement
 Dessin
@@ -32,4 +33,3 @@ Transports
 Travaux
 Vêtements
 Voyage
-
