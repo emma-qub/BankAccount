@@ -12,4 +12,5 @@ Impôts
 Loyer
 Patreon
 TCL
-
+Twitch
+YouTube Premium

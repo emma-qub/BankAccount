@@ -270,8 +270,9 @@ QString MonthlyCSVGenerator::ConvertXLSToCSV(QString const& p_xlsFileName) {
   QStringList newLines;
 
   while (inXlsFile.atEnd() == false) {
-    auto byteArrayList = inXlsFile.readLine().split('\t');
-    if (byteArrayList.at(4).contains("01056 102355U")) {
+    //auto byteArrayList = inXlsFile.readLine().split('\t');
+    auto byteArrayList = inXlsFile.readLine().split(';');
+    if (byteArrayList.last().contains("01056 102355U")) {
       continue;
     }
 
